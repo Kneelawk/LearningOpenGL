@@ -1,11 +1,17 @@
 package org.kneelawk.learningopengl
 
+import scala.collection.mutable.HashSet
+import scala.collection.mutable.HashMap
+import scala.reflect.runtime.{ universe => ru }
+
 /*
  * I wonder if you could have all the rendering code be in special
  * implicit ModelRenderers and have each one know how to render a specific kind of model?
  */
 
 class RenderEngine {
+  private val models = new HashMap[ModelRenderer[_], HashSet[AnyRef]]
+
   private var update: () => Unit = () => {}
   private var window: Window = null
   private var camera: Camera = null
@@ -31,11 +37,43 @@ class RenderEngine {
 
       update()
 
+      for ((renderer, set) <- models) {
+        renderer.preRender()
+        for (model <- set) {
+          renderer.render(model)
+        }
+        renderer.postRender()
+      }
+
       window.refresh()
     }
   }
 
-  def addModel[Model: ModelRenderer](model: Model): Unit = ???
-  def removeModel[Model: ModelRenderer](model: Model): Unit = ???
-  def clearModels(): Unit = ???
+  def addModel[Model <: AnyRef: ModelRenderer](model: Model) {
+    val renderer = implicitly[ModelRenderer[Model]]
+    val set: HashSet[AnyRef] = {
+      if (!models.contains(renderer)) {
+        val s = new HashSet[AnyRef]
+        models += ((renderer, s))
+        s
+      } else {
+        models(renderer)
+      }
+    }
+
+    set += model
+  }
+
+  def removeModel[Model <: AnyRef: ModelRenderer](model: Model): Boolean = {
+    val renderer = implicitly[ModelRenderer[Model]]
+    if (models.contains(renderer)) {
+      val set = models(renderer)
+      return set.remove(model)
+    }
+    return false
+  }
+
+  def clearModels() {
+    models.clear()
+  }
 }
