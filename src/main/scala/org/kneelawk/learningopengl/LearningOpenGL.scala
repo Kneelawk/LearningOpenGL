@@ -11,8 +11,6 @@ import org.lwjgl.glfw.GLFWVidMode
 import org.lwjgl.opengl.GL
 
 object LearningOpenGL {
-  var window: Long = 0
-
   def main(args: Array[String]) {
     println("Hello LWJGL " + Version.getVersion + "!")
 
