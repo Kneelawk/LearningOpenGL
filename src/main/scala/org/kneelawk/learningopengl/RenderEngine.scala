@@ -12,7 +12,7 @@ import scala.reflect.runtime.{ universe => ru }
 class RenderEngine {
   private val models = new HashMap[ModelRenderer[_], HashSet[AnyRef]]
 
-  private var update: () => Unit = () => {}
+  private var update: () => Unit = null
   private var window: Window = null
   private var camera: Camera = null
 
@@ -35,10 +35,11 @@ class RenderEngine {
 
       GraphicsInterface.update()
 
-      update()
+      if (update != null)
+        update()
 
       for ((renderer, set) <- models) {
-        renderer.preRender()
+        renderer.preRender(camera)
         for (model <- set) {
           renderer.render(model)
         }

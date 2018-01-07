@@ -14,7 +14,7 @@ trait ModelRenderer[Model] {
   /**
    * Called before rendering a batch of models.
    */
-  def preRender()
+  def preRender(camera: Camera)
   
   /**
    * Called for each model to render it.
