@@ -22,6 +22,7 @@ class UnlinkedShaderProgram(name: String) {
 
   def remove(component: ShaderComponent) = components -= component
 
+  @throws[ProgramLinkException]("if there is an error while linking this shader program")
   def link(): ShaderProgram = {
     val id = glCreateProgram()
 
