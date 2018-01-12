@@ -12,17 +12,7 @@ trait ModelRenderer[Model] {
   def initialized: Boolean
   
   /**
-   * Called before rendering a batch of models.
+   * Called to render a batch of models.
    */
-  def preRender(camera: Camera)
-  
-  /**
-   * Called for each model to render it.
-   */
-  def render(model: AnyRef)
-  
-  /**
-   * Called after rendering a batch of models.
-   */
-  def postRender()
+  def render(models: Iterable[AnyRef], camera: Camera)
 }

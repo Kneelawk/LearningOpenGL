@@ -39,11 +39,7 @@ class RenderEngine {
         update()
 
       for ((renderer, set) <- models) {
-        renderer.preRender(camera)
-        for (model <- set) {
-          renderer.render(model)
-        }
-        renderer.postRender()
+        renderer.render(set, camera)
       }
 
       window.refresh()
