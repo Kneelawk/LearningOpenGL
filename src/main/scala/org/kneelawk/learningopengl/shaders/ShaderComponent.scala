@@ -46,7 +46,12 @@ class ShaderComponentSource(source: String, name: String, tpe: ShaderType) {
 }
 
 case class ShaderComponent(id: Int, name: String, tpe: ShaderType) {
-  def delete() = glDeleteShader(id)
-  
+  private var deleted = false
+
+  def delete() = if (!deleted) {
+    glDeleteShader(id)
+    deleted = true
+  }
+
   override protected def finalize() = delete()
 }

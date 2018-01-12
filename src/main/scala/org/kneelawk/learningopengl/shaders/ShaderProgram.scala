@@ -52,7 +52,12 @@ class UnlinkedShaderProgram(name: String) {
 }
 
 case class ShaderProgram(id: Int, name: String) {
-  def delete() = glDeleteProgram(id)
+  private var deleted = false
+
+  def delete() = if (!deleted) {
+    glDeleteProgram(id)
+    deleted = true
+  }
 
   override protected def finalize() = delete()
 }
