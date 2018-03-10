@@ -1,3 +1,5 @@
 package org.kneelawk.learningopengl.simple
 
-case class SimpleVertexModel(vertexData: Array[Float])
+import org.joml.Matrix4f
+
+case class SimpleVertexModel(vertexData: Array[Float], model: Matrix4f)
