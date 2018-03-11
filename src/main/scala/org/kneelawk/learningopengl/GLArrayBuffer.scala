@@ -24,6 +24,9 @@ class GLArrayBuffer(initialAllocation: Long) {
    */
   private var maxSize: Long = initialAllocation
 
+  /**
+   * Constructs a GLArrayBuffer with an initial allocation of 1024 bytes.
+   */
   def this() = this(1024)
 
   glGenBuffers(buffers)
