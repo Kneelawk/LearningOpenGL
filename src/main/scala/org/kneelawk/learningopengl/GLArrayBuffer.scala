@@ -36,7 +36,7 @@ class GLArrayBuffer(initialAllocation: Long) {
   def this() = this(1024)
 
   glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
-  glBufferData(GL_ARRAY_BUFFER, maxSize, GL_STATIC_DRAW)
+  glBufferData(GL_ARRAY_BUFFER, maxSize, GL_DYNAMIC_DRAW)
 
   /**
    * This buffer's id.
@@ -204,7 +204,7 @@ class GLArrayBuffer(initialAllocation: Long) {
     // bind temp buffer to GL_COPY_READ_BUFFER
     glBindBuffer(GL_COPY_READ_BUFFER, tempBuf)
     // allocate data for the temp buffer
-    glBufferData(GL_COPY_READ_BUFFER, size, GL_STATIC_DRAW)
+    glBufferData(GL_COPY_READ_BUFFER, size, GL_STATIC_COPY)
 
     // copy the data from the default buffer to the temp buffer
     glCopyBufferSubData(GL_COPY_WRITE_BUFFER, GL_COPY_READ_BUFFER, 0, 0, size)
@@ -214,7 +214,7 @@ class GLArrayBuffer(initialAllocation: Long) {
       maxSize *= 2
 
       // allocate new space for the default buffer
-      glBufferData(GL_COPY_WRITE_BUFFER, maxSize, GL_STATIC_DRAW)
+      glBufferData(GL_COPY_WRITE_BUFFER, maxSize, GL_DYNAMIC_DRAW)
       // copy the old data back from the temp buffer
       glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size)
     }
@@ -241,7 +241,7 @@ class GLArrayBuffer(initialAllocation: Long) {
     glBindBuffer(GL_COPY_READ_BUFFER, tempBuf)
     // allocate data for the temp buffer but only as much
     // as there is data in the default buffer
-    glBufferData(GL_COPY_READ_BUFFER, size, GL_STATIC_DRAW)
+    glBufferData(GL_COPY_READ_BUFFER, size, GL_STATIC_COPY)
 
     // copy the data from the default buffer to the temp buffer
     glCopyBufferSubData(GL_COPY_WRITE_BUFFER, GL_COPY_READ_BUFFER, 0, 0, size)
@@ -249,7 +249,7 @@ class GLArrayBuffer(initialAllocation: Long) {
     maxSize *= 2
 
     // allocate new space for the default buffer with the new maxSize
-    glBufferData(GL_COPY_WRITE_BUFFER, maxSize, GL_STATIC_DRAW)
+    glBufferData(GL_COPY_WRITE_BUFFER, maxSize, GL_DYNAMIC_DRAW)
     // copy the old data back from the temp buffer
     glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size)
 
