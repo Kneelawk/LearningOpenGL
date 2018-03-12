@@ -40,10 +40,10 @@ object LearningOpenGL {
       camera.setView(0, 0, 5, 0, 0, 0, 0, 1, 0)
       // Z+ is towards the viewer
 
-      val engine = new RenderEngine
-      engine.init(window, camera)
-      engine.setUpdateCallback(update _)
-      engine.loop()
+//      val engine = new RenderEngine
+//      engine.init(window, camera)
+//      engine.setUpdateCallback(update _)
+//      engine.loop()
 
       window.destroy()
     } finally {
