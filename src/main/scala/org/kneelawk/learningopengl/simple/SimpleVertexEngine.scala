@@ -8,12 +8,15 @@ import org.lwjgl.opengl.GL30._
 import org.kneelawk.learningopengl.GraphicsInterface
 
 class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
+  // setup clear color
+  GraphicsInterface.setBackground(0.2f, 0.2f, 0.2f, 1.0f)
+  
+  // generate the vertex arrays
   private val vertexArrayId = glGenVertexArrays()
   // bind vertex array for setup
   glBindVertexArray(vertexArrayId)
 
   def onInit() {
-    GraphicsInterface.setBackground(0.2f, 0.2f, 0.2f, 1.0f)
   }
 
   def render() {
