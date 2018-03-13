@@ -20,8 +20,6 @@ abstract class AbstractRenderEngine[Model <: AnyRef] extends RenderEngine[Model]
   override def init(window: Window, camera: Camera) {
     this.window = window
     this.camera = camera
-
-    GraphicsInterface.setupContext()
     
     onInit()
   }

@@ -21,17 +21,17 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
     glBindVertexArray(vertexArrayId)
 
   }
-  
+
   def addModel(model: SimpleVertexModel) {
-    
+
   }
-  
+
   def removeModel(model: SimpleVertexModel) {
-    
+
   }
-  
+
   def clearModels() {
-    
+
   }
 
   def destroy() {
