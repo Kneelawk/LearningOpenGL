@@ -12,27 +12,25 @@ import scala.reflect.runtime.{ universe => ru }
  * to effectively become that of the RenderEngine.
  */
 
-class AbstractRenderEngine {
-  private val models = new HashMap[ModelRenderer[_], HashSet[AnyRef]]
+abstract class AbstractRenderEngine[Model <: AnyRef] extends RenderEngine[Model] {
+  protected var update: () => Unit = null
+  protected var window: Window = null
+  protected var camera: Camera = null
 
-  private var update: () => Unit = null
-  private var window: Window = null
-  private var camera: Camera = null
-
-  def init(window: Window, camera: Camera) {
+  override def init(window: Window, camera: Camera) {
     this.window = window
     this.camera = camera
 
     GraphicsInterface.setupContext()
-
-    GraphicsInterface.setBackground(0.2f, 0.2f, 0.2f, 1.0f)
+    
+    onInit()
   }
 
-  def setUpdateCallback(callback: () => Unit) {
+  override def setUpdateCallback(callback: () => Unit) {
     update = callback
   }
 
-  def loop() {
+  override def loop() {
     while (!window.shouldWindowClose()) {
       SystemInterface.pollEvents()
 
@@ -41,39 +39,13 @@ class AbstractRenderEngine {
       if (update != null)
         update()
 
-      for ((renderer, set) <- models) {
-        renderer.render(set, camera)
-      }
+      render()
 
       window.refresh()
     }
   }
-
-  def addModel[Model <: AnyRef: ModelRenderer](model: Model) {
-    val renderer = implicitly[ModelRenderer[Model]]
-    val set: HashSet[AnyRef] = {
-      if (!models.contains(renderer)) {
-        val s = new HashSet[AnyRef]
-        models += ((renderer, s))
-        s
-      } else {
-        models(renderer)
-      }
-    }
-
-    set += model
-  }
-
-  def removeModel[Model <: AnyRef: ModelRenderer](model: Model): Boolean = {
-    val renderer = implicitly[ModelRenderer[Model]]
-    if (models.contains(renderer)) {
-      val set = models(renderer)
-      return set.remove(model)
-    }
-    return false
-  }
-
-  def clearModels() {
-    models.clear()
-  }
+  
+  protected def onInit()
+  
+  protected def render()
 }

@@ -12,4 +12,6 @@ trait RenderEngine[Model <: AnyRef] {
   def removeModel(model: Model)
   
   def clearModels()
+  
+  def destroy()
 }
