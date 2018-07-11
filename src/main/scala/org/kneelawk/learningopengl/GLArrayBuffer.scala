@@ -62,9 +62,10 @@ class GLArrayBuffer(initialAllocation: Long) {
    * Append data to the end of this buffer.
    */
   def append(buf: ByteBuffer) {
+    val offset = size
     extend(buf.remaining())
     glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
-    glBufferSubData(GL_ARRAY_BUFFER, size, buf)
+    glBufferSubData(GL_ARRAY_BUFFER, offset, buf)
   }
 
   /**
