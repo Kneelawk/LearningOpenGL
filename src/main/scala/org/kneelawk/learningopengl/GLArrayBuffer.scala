@@ -5,6 +5,12 @@ import org.lwjgl.opengl.GL30._
 import org.lwjgl.opengl.GL31._
 import org.lwjgl.opengl.ARBInvalidateSubdata._
 import java.nio.ByteBuffer
+import org.lwjgl.system.MemoryUtil
+import java.nio.ShortBuffer
+import java.nio.IntBuffer
+import java.nio.LongBuffer
+import java.nio.DoubleBuffer
+import java.nio.FloatBuffer
 
 class GLArrayBuffer(initialAllocation: Long) {
   private val bufArray = new Array[Int](2)
@@ -51,99 +57,376 @@ class GLArrayBuffer(initialAllocation: Long) {
   /**
    * Set data within this buffer.
    * This can extend the length of this buffer if offset + buf.remaining() > getSize.
+   * ByteBuffer version.
    */
   def set(offset: Long, buf: ByteBuffer) {
-    extend(offset, buf.remaining())
+    setNative(offset, buf.remaining(), MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Set data within this buffer.
+   * This can extend the length of this buffer if offset + buf.remaining() > getSize.
+   * ShortBuffer version.
+   */
+  def set(offset: Long, buf: ShortBuffer) {
+    setNative(offset, buf.remaining() << 1, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Set data within this buffer.
+   * This can extend the length of this buffer if offset + buf.remaining() > getSize.
+   * IntBuffer version.
+   */
+  def set(offset: Long, buf: IntBuffer) {
+    setNative(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Set data within this buffer.
+   * This can extend the length of this buffer if offset + buf.remaining() > getSize.
+   * LongBuffer version.
+   */
+  def set(offset: Long, buf: LongBuffer) {
+    setNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Set data within this buffer.
+   * This can extend the length of this buffer if offset + buf.remaining() > getSize.
+   * FloatBuffer version.
+   */
+  def set(offset: Long, buf: FloatBuffer) {
+    setNative(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Set data within this buffer.
+   * This can extend the length of this buffer if offset + buf.remaining() > getSize.
+   * DoubleBuffer version.
+   */
+  def set(offset: Long, buf: DoubleBuffer) {
+    setNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+  }
+
+  def setNative(offset: Long, len: Long, data: Long) {
+    extend(offset, len)
     glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
-    glBufferSubData(GL_ARRAY_BUFFER, offset, buf)
+    nglBufferSubData(GL_ARRAY_BUFFER, offset, len, data)
   }
 
   /**
    * Append data to the end of this buffer.
+   * ByteBuffer version.
    */
   def append(buf: ByteBuffer) {
+    appendNative(buf.remaining(), MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Append data to the end of this buffer.
+   * ShortBuffer version.
+   */
+  def append(buf: ShortBuffer) {
+    appendNative(buf.remaining() << 1, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Append data to the end of this buffer.
+   * IntBuffer version.
+   */
+  def append(buf: IntBuffer) {
+    appendNative(buf.remaining() << 2, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Append data to the end of this buffer.
+   * LongBuffer version.
+   */
+  def append(buf: LongBuffer) {
+    appendNative(buf.remaining() << 3, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Append data to the end of this buffer.
+   * FloatBuffer version.
+   */
+  def append(buf: FloatBuffer) {
+    appendNative(buf.remaining() << 2, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Append data to the end of this buffer.
+   * DoubleBuffer version.
+   */
+  def append(buf: DoubleBuffer) {
+    appendNative(buf.remaining() << 3, MemoryUtil.memAddress(buf))
+  }
+
+  def appendNative(len: Long, data: Long) {
     val offset = size
-    extend(buf.remaining())
+    extend(len)
     glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
-    glBufferSubData(GL_ARRAY_BUFFER, offset, buf)
+    nglBufferSubData(GL_ARRAY_BUFFER, offset, len, data)
   }
 
   /**
    * Inserts a chunk of data into this buffer at offset, moving the data currently after
    * offset to the end of where this chunk is inserted.
+   * ByteBuffer version.
    */
   def insert(offset: Long, buf: ByteBuffer) {
+    insertNative(offset, buf.remaining(), MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Inserts a chunk of data into this buffer at offset, moving the data currently after
+   * offset to the end of where this chunk is inserted.
+   * ShortBuffer version.
+   */
+  def insert(offset: Long, buf: ShortBuffer) {
+    insertNative(offset, buf.remaining() << 1, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Inserts a chunk of data into this buffer at offset, moving the data currently after
+   * offset to the end of where this chunk is inserted.
+   * IntBuffer version.
+   */
+  def insert(offset: Long, buf: IntBuffer) {
+    insertNative(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Inserts a chunk of data into this buffer at offset, moving the data currently after
+   * offset to the end of where this chunk is inserted.
+   * LongBuffer version.
+   */
+  def insert(offset: Long, buf: LongBuffer) {
+    insertNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Inserts a chunk of data into this buffer at offset, moving the data currently after
+   * offset to the end of where this chunk is inserted.
+   * FloatBuffer version.
+   */
+  def insert(offset: Long, buf: FloatBuffer) {
+    insertNative(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Inserts a chunk of data into this buffer at offset, moving the data currently after
+   * offset to the end of where this chunk is inserted.
+   * DoubleBuffer version.
+   */
+  def insert(offset: Long, buf: DoubleBuffer) {
+    insertNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+  }
+
+  def insertNative(offset: Long, len: Long, data: Long) {
     if (offset > size) {
       throw new IndexOutOfBoundsException(s"Cannot insert a buffer at $offset (beyond size $size)")
     } else if (offset == size) {
-      append(buf)
+      appendNative(len, data)
     } else {
-      val bufLen = buf.remaining()
+      val bufLen = len
       copyChunk(offset, offset + bufLen, size - offset)
       glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
-      glBufferSubData(GL_ARRAY_BUFFER, offset, buf)
+      nglBufferSubData(GL_ARRAY_BUFFER, offset, len, data)
     }
   }
 
   /**
    * Replaces the chunk at offset of size chunkLen with the data in buf.
+   * ByteBuffer version.
    */
   def replace(offset: Long, chunkLen: Long, buf: ByteBuffer) {
+    replaceNative(offset, chunkLen, buf.remaining(), MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces the chunk at offset of size chunkLen with the data in buf.
+   * ShortBuffer version.
+   */
+  def replace(offset: Long, chunkLen: Long, buf: ShortBuffer) {
+    replaceNative(offset, chunkLen, buf.remaining() << 1, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces the chunk at offset of size chunkLen with the data in buf.
+   * IntBuffer version.
+   */
+  def replace(offset: Long, chunkLen: Long, buf: IntBuffer) {
+    replaceNative(offset, chunkLen, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces the chunk at offset of size chunkLen with the data in buf.
+   * LongBuffer version.
+   */
+  def replace(offset: Long, chunkLen: Long, buf: LongBuffer) {
+    replaceNative(offset, chunkLen, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces the chunk at offset of size chunkLen with the data in buf.
+   * FloatBuffer version.
+   */
+  def replace(offset: Long, chunkLen: Long, buf: FloatBuffer) {
+    replaceNative(offset, chunkLen, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces the chunk at offset of size chunkLen with the data in buf.
+   * DoubleBuffer version.
+   */
+  def replace(offset: Long, chunkLen: Long, buf: DoubleBuffer) {
+    replaceNative(offset, chunkLen, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+  }
+
+  def replaceNative(offset: Long, chunkLen: Long, len: Long, data: Long) {
     if (offset > size)
       throw new IndexOutOfBoundsException(s"Cannot replace a chunk at $offset (beyond size $size)")
 
-    val bufLen = buf.remaining()
-    val lenDif = bufLen - chunkLen
+    val lenDif = len - chunkLen
 
     if (offset + chunkLen < size) {
       if (lenDif != 0) {
-        copyChunk(offset + chunkLen, offset + bufLen, size - (offset + chunkLen))
+        copyChunk(offset + chunkLen, offset + len, size - (offset + chunkLen))
       }
 
       glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
-      glBufferSubData(GL_ARRAY_BUFFER, offset, buf)
+      nglBufferSubData(GL_ARRAY_BUFFER, offset, len, data)
 
       size += lenDif
     } else {
-      extend(offset, bufLen)
+      extend(offset, len)
       glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
-      glBufferSubData(GL_ARRAY_BUFFER, offset, buf)
+      nglBufferSubData(GL_ARRAY_BUFFER, offset, len, data)
 
-      size = offset + bufLen
+      size = offset + len
     }
   }
 
   /**
    * Replaces everything at and after offset with the data in buf.
+   * ByteBuffer version.
    */
   def replaceAfter(offset: Long, buf: ByteBuffer) {
+    replaceAfterNative(offset, buf.remaining(), MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces everything at and after offset with the data in buf.
+   * ShortBuffer version.
+   */
+  def replaceAfter(offset: Long, buf: ShortBuffer) {
+    replaceAfterNative(offset, buf.remaining() << 1, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces everything at and after offset with the data in buf.
+   * IntBuffer version.
+   */
+  def replaceAfter(offset: Long, buf: IntBuffer) {
+    replaceAfterNative(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces everything at and after offset with the data in buf.
+   * LongBuffer version.
+   */
+  def replaceAfter(offset: Long, buf: LongBuffer) {
+    replaceAfterNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces everything at and after offset with the data in buf.
+   * FloatBuffer version.
+   */
+  def replaceAfter(offset: Long, buf: FloatBuffer) {
+    replaceAfterNative(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces everything at and after offset with the data in buf.
+   * DoubleBuffer version.
+   */
+  def replaceAfter(offset: Long, buf: DoubleBuffer) {
+    replaceAfterNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+  }
+
+  def replaceAfterNative(offset: Long, len: Long, data: Long) {
     if (offset > size)
       throw new IndexOutOfBoundsException(s"Cannot replace a chunk at $offset (beyond size $size)")
 
-    val bufLen = buf.remaining()
-    extend(offset, bufLen)
+    extend(offset, len)
     glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
-    glBufferSubData(GL_ARRAY_BUFFER, offset, buf)
+    nglBufferSubData(GL_ARRAY_BUFFER, offset, len, data)
 
-    size = offset + bufLen
+    size = offset + len
   }
 
   /**
    * Replaces everything before cutoff with the data in buf.
+   * ByteBuffer version.
    */
   def replaceBefore(cutoff: Long, buf: ByteBuffer) {
+    replaceBeforeNative(cutoff, buf.remaining(), MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces everything before cutoff with the data in buf.
+   * ShortBuffer version.
+   */
+  def replaceBefore(cutoff: Long, buf: ShortBuffer) {
+    replaceBeforeNative(cutoff, buf.remaining() << 1, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces everything before cutoff with the data in buf.
+   * IntBuffer version.
+   */
+  def replaceBefore(cutoff: Long, buf: IntBuffer) {
+    replaceBeforeNative(cutoff, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces everything before cutoff with the data in buf.
+   * LongBuffer version.
+   */
+  def replaceBefore(cutoff: Long, buf: LongBuffer) {
+    replaceBeforeNative(cutoff, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces everything before cutoff with the data in buf.
+   * FloatBuffer version.
+   */
+  def replaceBefore(cutoff: Long, buf: FloatBuffer) {
+    replaceBeforeNative(cutoff, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+  }
+
+  /**
+   * Replaces everything before cutoff with the data in buf.
+   * DoubleBuffer version.
+   */
+  def replaceBefore(cutoff: Long, buf: DoubleBuffer) {
+    replaceBeforeNative(cutoff, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+  }
+
+  def replaceBeforeNative(cutoff: Long, len: Long, data: Long) {
     if (cutoff > size)
       throw new IndexOutOfBoundsException(s"Cannot replace everything before $cutoff (beyond size $size)")
 
-    val bufLen = buf.remaining()
-    val lenDif = bufLen - cutoff
+    val lenDif = len - cutoff
 
     if (lenDif != 0) {
-      copyChunk(cutoff, bufLen, size - cutoff)
+      copyChunk(cutoff, len, size - cutoff)
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
-    glBufferSubData(GL_ARRAY_BUFFER, 0, buf)
+    nglBufferSubData(GL_ARRAY_BUFFER, 0, len, data)
 
     size += lenDif
   }
