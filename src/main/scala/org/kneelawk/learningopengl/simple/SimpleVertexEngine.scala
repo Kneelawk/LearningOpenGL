@@ -1,10 +1,12 @@
 package org.kneelawk.learningopengl.simple
 
 import scala.collection.mutable.HashMap
+import scala.collection.mutable.ListBuffer
 
 import org.kneelawk.learningopengl.AbstractRenderEngine
-import org.kneelawk.learningopengl.GLArrayBuffer
 import org.kneelawk.learningopengl.GraphicsInterface
+import org.kneelawk.learningopengl.buffers.GLArrayBuffer
+import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL30.glBindVertexArray
 import org.lwjgl.opengl.GL30.glDeleteVertexArrays
 import org.lwjgl.opengl.GL30.glGenVertexArrays
@@ -21,6 +23,7 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
   private val vertices = new GLArrayBuffer
   private val matrices = new GLArrayBuffer
   private val indecies = new HashMap[SimpleVertexModel, SimpleVertexModelIndex]
+  private val indexList = new ListBuffer[SimpleVertexModelIndex]
 
   def onInit() {
   }
@@ -32,18 +35,56 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
   }
 
   def addModel(model: SimpleVertexModel) {
+    if (indecies.contains(model)) {
+      return
+    }
+
     val index = SimpleVertexModelIndex(vertices.getSize, matrices.getSize)
+
+    val vertbuf = BufferUtils.createFloatBuffer(model.vertexData.length)
+    vertbuf.put(model.vertexData)
+    vertbuf.flip()
+    vertices.append(vertbuf)
+
+    val matBuf = BufferUtils.createFloatBuffer(16)
+    model.model.get(matBuf)
+    matBuf.flip()
+    matrices.append(matBuf)
+
+    indecies += ((model, index))
+    indexList += index
   }
 
   def removeModel(model: SimpleVertexModel) {
+    if (!indecies.contains(model)) {
+      return
+    }
 
+    val index = indecies(model)
+    val vertLen = model.vertexData.length << 2
+    val matLen = 16 << 2
+
+    vertices.remove(index.vertex, vertLen)
+    matrices.remove(index.matrix, matLen)
+
+    indexList.slice(indexList.indexOf(index) + 1, indexList.size).foreach({ f =>
+      f.vertex -= vertLen
+      f.matrix -= matLen
+    })
+
+    indexList -= index
   }
 
   def clearModels() {
-
+    vertices.clear()
+    matrices.clear()
+    indecies.clear()
+    indexList.clear()
   }
 
   def destroy() {
     glDeleteVertexArrays(vertexArrayId)
+    vertices.destroy()
+    matrices.destroy()
   }
 }

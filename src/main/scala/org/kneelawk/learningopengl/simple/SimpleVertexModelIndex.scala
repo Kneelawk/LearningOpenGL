@@ -1,3 +1,3 @@
 package org.kneelawk.learningopengl.simple
 
-case class SimpleVertexModelIndex(vertex: Long, matrix: Long)
+case class SimpleVertexModelIndex(var vertex: Long, var matrix: Long)
