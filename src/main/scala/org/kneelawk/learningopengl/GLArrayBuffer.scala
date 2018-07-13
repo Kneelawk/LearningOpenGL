@@ -11,9 +11,66 @@ import java.nio.IntBuffer
 import java.nio.LongBuffer
 import java.nio.DoubleBuffer
 import java.nio.FloatBuffer
+import scala.math.Ordering
 
+/**
+ * Object representing a set operation.
+ */
+case class GLArrayBufferSetOperation(offset: Long, bufLen: Long, bufData: Long) {
+
+  if (offset < 0)
+    throw new IllegalArgumentException("The offset cannot be negative")
+
+  if (bufLen < 0)
+    throw new IllegalArgumentException("The length of the buffer cannot be negative")
+
+  /**
+   * ByteBuffer version of the constructor.
+   */
+  def this(offset: Long, buf: ByteBuffer) =
+    this(offset, buf.remaining(), MemoryUtil.memAddress(buf))
+
+  /**
+   * ShortBuffer version of the constructor.
+   */
+  def this(offset: Long, buf: ShortBuffer) =
+    this(offset, buf.remaining() << 1, MemoryUtil.memAddress(buf))
+
+  /**
+   * IntBuffer version of the constructor.
+   */
+  def this(offset: Long, buf: IntBuffer) =
+    this(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+
+  /**
+   * LongBuffer version of the constructor.
+   */
+  def this(offset: Long, buf: LongBuffer) =
+    this(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+
+  /**
+   * FloatBuffer version of the constructor.
+   */
+  def this(offset: Long, buf: FloatBuffer) =
+    this(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+
+  /**
+   * DoubleBuffer version of the constructor.
+   */
+  def this(offset: Long, buf: DoubleBuffer) =
+    this(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+}
+
+/**
+ * Object and utilities for managing buffer objects.
+ */
 class GLArrayBuffer(initialAllocation: Long) {
+
+  /**
+   * Array of both buffers for safe keeping.
+   */
   private val bufArray = new Array[Int](2)
+  // Create both buffer names
   glGenBuffers(bufArray)
 
   /**
@@ -41,7 +98,9 @@ class GLArrayBuffer(initialAllocation: Long) {
    */
   def this() = this(1024)
 
+  // bind default buffer to GL_ARRAY_BUFFER
   glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
+  // initialize the space within the default buffer
   glBufferData(GL_ARRAY_BUFFER, maxSize, GL_DYNAMIC_DRAW)
 
   /**
@@ -108,10 +167,44 @@ class GLArrayBuffer(initialAllocation: Long) {
     setNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
   }
 
+  /**
+   * Set data within this buffer.
+   * This can extend the length of this buffer if offset + len > getSize.
+   * Memory length and address version.
+   */
   def setNative(offset: Long, len: Long, data: Long) {
-    extend(offset, len)
+    if (len < 0)
+      throw new IllegalArgumentException("The length of the buffer cannot be negative")
+
+    val chunkEnd = offset + len
+
+    extendToPoint(chunkEnd)
     glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
     nglBufferSubData(GL_ARRAY_BUFFER, offset, len, data)
+
+    if (chunkEnd > size) {
+      size = chunkEnd
+    }
+  }
+
+  /**
+   * Bulk set chunks of data within this buffer.
+   * This can extend the length of this buffer if any of the operation's offset + their bufLen > getSize.
+   */
+  def setChunks(tasks: Seq[GLArrayBufferSetOperation]) {
+    val lastChunk = tasks.maxBy(t => t.offset + t.bufLen)
+    val lastChunkEnd = lastChunk.offset + lastChunk.bufLen
+
+    extendToPoint(lastChunkEnd)
+    glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
+
+    for (chunk <- tasks) {
+      nglBufferSubData(GL_ARRAY_BUFFER, chunk.offset, chunk.bufLen, chunk.bufData)
+    }
+
+    if (lastChunkEnd > size) {
+      size = lastChunkEnd
+    }
   }
 
   /**
@@ -162,11 +255,19 @@ class GLArrayBuffer(initialAllocation: Long) {
     appendNative(buf.remaining() << 3, MemoryUtil.memAddress(buf))
   }
 
+  /**
+   * Append data to the end of this buffer.
+   * Memory length and address version.
+   */
   def appendNative(len: Long, data: Long) {
-    val offset = size
-    extend(len)
+    if (len < 0)
+      throw new IllegalArgumentException("The length of the buffer cannot be negative")
+
+    extendFromEnd(len)
     glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
-    nglBufferSubData(GL_ARRAY_BUFFER, offset, len, data)
+    nglBufferSubData(GL_ARRAY_BUFFER, size, len, data)
+
+    size += len
   }
 
   /**
@@ -223,16 +324,23 @@ class GLArrayBuffer(initialAllocation: Long) {
     insertNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
   }
 
+  /**
+   * Inserts a chunk of data into this buffer at offset, moving the data currently after
+   * offset to the end of where this chunk is inserted.
+   * Memory length and address version.
+   */
   def insertNative(offset: Long, len: Long, data: Long) {
-    if (offset > size) {
-      throw new IndexOutOfBoundsException(s"Cannot insert a buffer at $offset (beyond size $size)")
-    } else if (offset == size) {
-      appendNative(len, data)
+    if (len < 0)
+      throw new IllegalArgumentException("The length of the buffer cannot be negative")
+
+    if (offset >= size) {
+      setNative(offset, len, data)
     } else {
-      val bufLen = len
-      copyChunk(offset, offset + bufLen, size - offset)
+      copyChunk(offset, offset + len, size - offset)
       glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
       nglBufferSubData(GL_ARRAY_BUFFER, offset, len, data)
+
+      size += len
     }
   }
 
@@ -284,9 +392,16 @@ class GLArrayBuffer(initialAllocation: Long) {
     replaceNative(offset, chunkLen, buf.remaining() << 3, MemoryUtil.memAddress(buf))
   }
 
+  /**
+   * Replaces the chunk at offset of size chunkLen with the data represented by len and data.
+   * Memory length and address version.
+   */
   def replaceNative(offset: Long, chunkLen: Long, len: Long, data: Long) {
-    if (offset > size)
-      throw new IndexOutOfBoundsException(s"Cannot replace a chunk at $offset (beyond size $size)")
+    if (chunkLen < 0)
+      throw new IllegalArgumentException("The length of the chunk to be replaced cannot be negative")
+
+    if (len < 0)
+      throw new IllegalArgumentException("The length of the buffer cannot be negative")
 
     val lenDif = len - chunkLen
 
@@ -300,7 +415,7 @@ class GLArrayBuffer(initialAllocation: Long) {
 
       size += lenDif
     } else {
-      extend(offset, len)
+      extendToPoint(offset + len)
       glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
       nglBufferSubData(GL_ARRAY_BUFFER, offset, len, data)
 
@@ -356,11 +471,18 @@ class GLArrayBuffer(initialAllocation: Long) {
     replaceAfterNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
   }
 
+  /**
+   * Replaces everything at and after offset with the data represented by len and data.
+   * Memory length and address version.
+   */
   def replaceAfterNative(offset: Long, len: Long, data: Long) {
+    if (len < 0)
+      throw new IllegalArgumentException("The length of the buffer cannot be negative")
+
     if (offset > size)
       throw new IndexOutOfBoundsException(s"Cannot replace a chunk at $offset (beyond size $size)")
 
-    extend(offset, len)
+    extendToPoint(offset + len)
     glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
     nglBufferSubData(GL_ARRAY_BUFFER, offset, len, data)
 
@@ -415,7 +537,14 @@ class GLArrayBuffer(initialAllocation: Long) {
     replaceBeforeNative(cutoff, buf.remaining() << 3, MemoryUtil.memAddress(buf))
   }
 
+  /**
+   * Replaces everything before cutoff with the data by len and data.
+   * Memory length and address version.
+   */
   def replaceBeforeNative(cutoff: Long, len: Long, data: Long) {
+    if (len < 0)
+      throw new IllegalArgumentException("The length of the buffer cannot be negative")
+
     if (cutoff > size)
       throw new IndexOutOfBoundsException(s"Cannot replace everything before $cutoff (beyond size $size)")
 
@@ -477,6 +606,13 @@ class GLArrayBuffer(initialAllocation: Long) {
   }
 
   /**
+   * Deletes the buffers held by this object, invalidating it.
+   */
+  def destroy() {
+    glDeleteBuffers(bufArray)
+  }
+
+  /**
    * Copies a chunk of data around within the default buffer, resizing if necessary.
    */
   private def copyChunk(sourceOffset: Long, destOffset: Long, chunkLen: Long) {
@@ -506,9 +642,43 @@ class GLArrayBuffer(initialAllocation: Long) {
     // copy the chunk from the source location in the temp buffer to the dest location in the default buffer
     glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, sourceOffset, destOffset, chunkLen)
 
-    // increase the current length if necessary
-    if (chunkEnd > size) {
-      size = chunkEnd
+    // free the temp buffer's allocated space
+    glInvalidateBufferData(tempBuf)
+  }
+
+  /**
+   * Designed for bulk-copying different chunks around within the default buffer, resizing if necessary.
+   */
+  private def copyChunks(tasks: Seq[ChunkCopyTask]) {
+    // find the chunk that ends last
+    val lastChunk = tasks.maxBy(t => t.destOffset + t.chunkLen)
+    // where does that last chunk end?
+    val lastChunkEnd = lastChunk.destOffset + lastChunk.chunkLen
+
+    // bind default buffer to GL_COPY_WRITE_BUFFER
+    glBindBuffer(GL_COPY_WRITE_BUFFER, defaultBuf)
+    // bind temp buffer to GL_COPY_READ_BUFFER
+    glBindBuffer(GL_COPY_READ_BUFFER, tempBuf)
+    // allocate space for the temp buffer
+    glBufferData(GL_COPY_READ_BUFFER, size, GL_STATIC_COPY)
+
+    // copy the data from the default buffer to the temp buffer
+    glCopyBufferSubData(GL_COPY_WRITE_BUFFER, GL_COPY_READ_BUFFER, 0, 0, size)
+
+    // if a resize is needed then resize and copy all the data back from the temp buffer
+    if (lastChunkEnd > maxSize) {
+      maxSize *= 2
+
+      // allocate new space for the default buffer
+      glBufferData(GL_COPY_WRITE_BUFFER, maxSize, GL_DYNAMIC_DRAW)
+      // copy the old data back from the temp buffer
+      glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size)
+    }
+
+    // for each copy task:
+    for (chunk <- tasks) {
+      // copy the chunk from the source location in the temp buffer to the dest location in the default buffer
+      glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, chunk.sourceOffset, chunk.destOffset, chunk.chunkLen)
     }
 
     // free the temp buffer's allocated space
@@ -542,26 +712,25 @@ class GLArrayBuffer(initialAllocation: Long) {
   }
 
   /**
-   * Extends the length of this buffer and resizes if needed.
+   * Resizes if needed.
    */
-  private def extend(extraSize: Long) {
+  private def extendFromEnd(extraSize: Long) {
     if (extraSize + size > maxSize) {
       resize()
     }
-
-    size += extraSize
   }
 
   /**
-   * Extends the length of this buffer if needed and resizes if needed.
+   * Resizes if needed.
    */
-  private def extend(offset: Long, extraSize: Long) {
-    if (extraSize + offset > maxSize) {
+  private def extendToPoint(point: Long) {
+    if (point > maxSize) {
       resize()
     }
-
-    if (extraSize + offset > size) {
-      size = extraSize + offset
-    }
   }
+
+  /**
+   * Case class designed to be used in lists for bulk copy operations.
+   */
+  private case class ChunkCopyTask(sourceOffset: Long, destOffset: Long, chunkLen: Long)
 }
