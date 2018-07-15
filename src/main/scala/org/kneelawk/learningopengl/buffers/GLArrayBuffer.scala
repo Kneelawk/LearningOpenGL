@@ -296,6 +296,10 @@ class GLArrayBuffer(initialAllocation: Long) {
     }
   }
 
+  def insertChunks(tasks: Seq[GLArrayBufferInsertOperation]) {
+    // TODO implement me!
+  }
+
   /**
    * Replaces the chunk at offset of size chunkLen with the data in buf.
    * ByteBuffer version.
@@ -373,6 +377,10 @@ class GLArrayBuffer(initialAllocation: Long) {
 
       size = offset + len
     }
+  }
+
+  def replaceChunks(tasks: Seq[GLArrayBufferReplaceOperation]) {
+    // TODO implement me!
   }
 
   /**
@@ -526,6 +534,10 @@ class GLArrayBuffer(initialAllocation: Long) {
     } else {
       size = offset
     }
+  }
+
+  def removeChunks(tasks: Seq[GLArrayBufferRemoveOperation]) {
+    // TODO implement me!
   }
 
   /**
