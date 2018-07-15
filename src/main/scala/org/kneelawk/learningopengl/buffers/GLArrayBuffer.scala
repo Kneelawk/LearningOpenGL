@@ -538,6 +538,10 @@ class GLArrayBuffer(initialAllocation: Long) {
 
   def removeChunks(tasks: Seq[GLArrayBufferRemoveOperation]) {
     // TODO implement me!
+    val lastChunk = tasks.maxBy(t => t.offset + t.chunkLen)
+    val lastChunkEnd = lastChunk.offset + lastChunk.chunkLen
+
+    val sorted = tasks.sortBy(_.offset)
   }
 
   /**
