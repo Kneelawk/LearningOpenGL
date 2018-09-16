@@ -544,9 +544,10 @@ class GLArrayBuffer(initialAllocation: Long) {
       clear()
     } else {
       val copyTasks = new ListBuffer[ChunkCopyTask]
+      var curSize = size
 
       for (op <- tasks) {
-        val ntask = new ChunkCopyTask(op.offset + op.chunkLen, op.offset, 0)
+        val ntask = new ChunkCopyTask(op.offset + op.chunkLen, op.offset, curSize - (op.offset + op.chunkLen))
         // TODO implement me!
       }
     }
