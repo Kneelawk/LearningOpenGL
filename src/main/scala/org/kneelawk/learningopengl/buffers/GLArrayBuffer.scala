@@ -12,6 +12,7 @@ import java.nio.LongBuffer
 import java.nio.DoubleBuffer
 import java.nio.FloatBuffer
 import scala.math.Ordering
+import scala.collection.mutable.ListBuffer
 
 /**
  * Object and utilities for managing buffer objects.
@@ -537,11 +538,18 @@ class GLArrayBuffer(initialAllocation: Long) {
   }
 
   def removeChunks(tasks: Seq[GLArrayBufferRemoveOperation]) {
-    // TODO implement me!
-    val lastChunk = tasks.maxBy(t => t.offset + t.chunkLen)
-    val lastChunkEnd = lastChunk.offset + lastChunk.chunkLen
+    val newSize = tasks.foldLeft(size)((a, op) => a - op.chunkLen)
 
-    val sorted = tasks.sortBy(_.offset)
+    if (newSize <= 0) {
+      clear()
+    } else {
+      val copyTasks = new ListBuffer[ChunkCopyTask]
+
+      for (op <- tasks) {
+        val ntask = new ChunkCopyTask(op.offset + op.chunkLen, op.offset, 0)
+        // TODO implement me!
+      }
+    }
   }
 
   /**
@@ -656,7 +664,7 @@ class GLArrayBuffer(initialAllocation: Long) {
   /**
    * Doubles the length of allocated space for this buffer.
    */
-  private def resize() {
+  private def resize(newSize: Long) {
     // bind default buffer to GL_COPY_WRITE_BUFFER
     glBindBuffer(GL_COPY_WRITE_BUFFER, defaultBuf)
     // bind temp buffer to GL_COPY_READ_BUFFER
@@ -668,7 +676,8 @@ class GLArrayBuffer(initialAllocation: Long) {
     // copy the data from the default buffer to the temp buffer
     glCopyBufferSubData(GL_COPY_WRITE_BUFFER, GL_COPY_READ_BUFFER, 0, 0, size)
 
-    maxSize *= 2
+    while (maxSize < newSize)
+      maxSize *= 2
 
     // allocate new space for the default buffer with the new maxSize
     glBufferData(GL_COPY_WRITE_BUFFER, maxSize, GL_DYNAMIC_DRAW)
@@ -684,7 +693,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    */
   private def extendFromEnd(extraSize: Long) {
     if (extraSize + size > maxSize) {
-      resize()
+      resize(extraSize + size)
     }
   }
 
@@ -693,12 +702,14 @@ class GLArrayBuffer(initialAllocation: Long) {
    */
   private def extendToPoint(point: Long) {
     if (point > maxSize) {
-      resize()
+      resize(point)
     }
   }
 
   /**
    * Case class designed to be used in lists for bulk copy operations.
    */
-  private case class ChunkCopyTask(sourceOffset: Long, destOffset: Long, chunkLen: Long)
+  private case class ChunkCopyTask(var sourceOffset: Long, var destOffset: Long, var chunkLen: Long)
+
+  private case class ChunkSetTask(var bufOffset: Long, var bufLen: Long, var bufData: Long, var destOffset: Long)
 }
