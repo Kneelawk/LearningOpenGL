@@ -137,19 +137,41 @@ class GLArrayBuffer(initialAllocation: Long) {
 
   /**
    * Bulk set chunks of data within this buffer.
-   * This can extend the length of this buffer if any of the operation's offset + their bufLen > getSize.
+   * This can extend the length of this buffer if any of the operations' offset + their bufLen > getSize.
    */
   def setChunks(tasks: Seq[GLArrayBufferSetOperation]) {
+    // calculate the end of the last chunk
     val lastChunk = tasks.maxBy(t => t.offset + t.bufLen)
     val lastChunkEnd = lastChunk.offset + lastChunk.bufLen
 
+    // make sure the buffer is large enough
     extendToPoint(lastChunkEnd)
+
+    // bind the buffer
     glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
 
+    // allocate a client side buffer to operate on
+    val defaultBufData = MemoryUtil.memAlloc(lastChunkEnd)
+    // copy the graphics side buffer to the client side buffer
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, defaultBufData)
+
+    // perform every operation on the client side buffer
     for (chunk <- tasks) {
-      nglBufferSubData(GL_ARRAY_BUFFER, chunk.offset, chunk.bufLen, chunk.bufData)
+      val chunkBuf = MemoryUtil.memByteBuffer(chunk.bufData, chunk.bufLen)
+      defaultBufData.position(chunk.offset)
+      defaultBufData.put(chunkBuf)
     }
 
+    // move the position of the client buffer back to the beginning
+    defaultBufData.rewind()
+
+    // copy the client side buffer back to the graphics side buffer
+    glBufferSubData(GL_ARRAY_BUFFER, 0, defaultBufData)
+
+    // free the client side buffer
+    MemoryUtil.memFree(defaultBufData)
+
+    // extend the size
     if (lastChunkEnd > size) {
       size = lastChunkEnd
     }
@@ -292,8 +314,66 @@ class GLArrayBuffer(initialAllocation: Long) {
     }
   }
 
+  /**
+   * Bulk insert chunks of data into this buffer. This will increase the size of this buffer.
+   *
+   * @param tasks The sequence of insert operations to be performed
+   */
   def insertChunks(tasks: Seq[GLArrayBufferInsertOperation]) {
-    // TODO implement me!
+    // calculate the size of the new buffer
+    val newSize = tasks.foldLeft(size.toInt)((a, b) => a + b.bufLen)
+
+    // make sure this buffer is large enough
+    extendToPoint(newSize)
+
+    // bind the default buffer
+    glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
+
+    // allocate a cpu side buffer for the data
+    val defaultBufData = MemoryUtil.memAlloc(newSize)
+    // allocate a temp cpu side buffer for the data
+    val tempHolder = MemoryUtil.memAlloc(newSize)
+    // copy the data from the graphics side buffer to the cpu side buffer
+    glGetBufferSubData(GL_ARRAY_BUFFER, 0, defaultBufData)
+
+    // this keeps track of the current size as we grow it
+    var currentSize = size.toInt
+
+    // apply every operation in sequence
+    for (chunk <- tasks) {
+      // reset the temp cpu side buffer
+      tempHolder.clear()
+      // setup the default cpu side buffer to be read from
+      defaultBufData.position(chunk.offset)
+      defaultBufData.limit(currentSize)
+      // read the data after the insert into the temp cpu side buffer
+      tempHolder.put(defaultBufData)
+      // set the temp buffer's limit to it's current position and its position to 0 so it can be read back into the default buffer
+      tempHolder.flip()
+      // get the chunk's buffer
+      val chunkBuffer = MemoryUtil.memByteBuffer(chunk.bufData, chunk.bufLen)
+      // setup the default cpu side buffer to be written to
+      defaultBufData.position(chunk.offset)
+      // write the inserted data to the default cpu side buffer
+      defaultBufData.put(chunkBuffer)
+      // write the temp buffer's content after the inserted data
+      defaultBufData.put(tempHolder)
+      // keep track of buffer size increases
+      currentSize += chunk.bufLen
+    }
+
+    // set the default client side buffer's position to 0 so it can be read
+    defaultBufData.rewind()
+
+    // copy the the data from the cpu side buffer back to the graphics side buffer
+    glBufferSubData(GL_ARRAY_BUFFER, 0, defaultBufData)
+
+    // free our buffers now that we're done with them
+    MemoryUtil.memFree(defaultBufData)
+    MemoryUtil.memFree(tempHolder)
+
+    // set the buffer size field
+    size = newSize
   }
 
   /**
