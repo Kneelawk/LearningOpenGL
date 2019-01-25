@@ -1,26 +1,26 @@
 package org.kneelawk.learningopengl.shaders
 
+import org.lwjgl.BufferUtils
+import org.lwjgl.opengl.GL11._
+import org.lwjgl.opengl.GL20._
+
+import scala.collection.{TraversableOnce, mutable}
 import scala.collection.mutable.HashSet
 
-import org.lwjgl.opengl.GL20._
-import org.lwjgl.opengl.GL11._
-import org.lwjgl.BufferUtils
-import scala.collection.TraversableOnce
-
 class UnlinkedShaderProgram(name: String) {
-  private val components = new HashSet[ShaderComponent]
+  private val components = new mutable.HashSet[ShaderComponent]
 
-  def +=(component: ShaderComponent) = add(component)
+  def +=(component: ShaderComponent): components.type = add(component)
 
-  def ++=(componentSet: TraversableOnce[ShaderComponent]) = add(componentSet)
+  def ++=(componentSet: TraversableOnce[ShaderComponent]): components.type = add(componentSet)
 
-  def -=(component: ShaderComponent) = remove(component)
+  def -=(component: ShaderComponent): components.type = remove(component)
 
-  def add(component: ShaderComponent) = components += component
+  def add(component: ShaderComponent): components.type = components += component
 
-  def add(componentSet: TraversableOnce[ShaderComponent]) = components ++= componentSet
+  def add(componentSet: TraversableOnce[ShaderComponent]): components.type = components ++= componentSet
 
-  def remove(component: ShaderComponent) = components -= component
+  def remove(component: ShaderComponent): components.type = components -= component
 
   @throws[ProgramLinkException]("if there is an error while linking this shader program")
   def link(): ShaderProgram = {
@@ -47,17 +47,17 @@ class UnlinkedShaderProgram(name: String) {
       throw new ProgramLinkException(s"Error linking shader program: $name, log: $log, status: $status")
     }
 
-    return new ShaderProgram(id, name)
+    ShaderProgram(id, name)
   }
 }
 
 case class ShaderProgram(id: Int, name: String) {
   private var deleted = false
 
-  def delete() = if (!deleted) {
+  def delete(): Unit = if (!deleted) {
     glDeleteProgram(id)
     deleted = true
   }
 
-  override protected def finalize() = delete()
+  override protected def finalize(): Unit = delete()
 }

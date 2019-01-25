@@ -1,15 +1,12 @@
 package org.kneelawk.learningopengl.simple
 
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.ListBuffer
-
-import org.kneelawk.learningopengl.AbstractRenderEngine
-import org.kneelawk.learningopengl.GraphicsInterface
 import org.kneelawk.learningopengl.buffers.GLArrayBuffer
+import org.kneelawk.learningopengl.{AbstractRenderEngine, GraphicsInterface}
 import org.lwjgl.BufferUtils
-import org.lwjgl.opengl.GL30.glBindVertexArray
-import org.lwjgl.opengl.GL30.glDeleteVertexArrays
-import org.lwjgl.opengl.GL30.glGenVertexArrays
+import org.lwjgl.opengl.GL30.{glBindVertexArray, glDeleteVertexArrays, glGenVertexArrays}
+
+import scala.collection.mutable
+import scala.collection.mutable.{HashMap, ListBuffer}
 
 class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
   // setup clear color
@@ -22,7 +19,7 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
 
   private val vertices = new GLArrayBuffer
   private val matrices = new GLArrayBuffer
-  private val indecies = new HashMap[SimpleVertexModel, SimpleVertexModelIndex]
+  private val indecies = new mutable.HashMap[SimpleVertexModel, SimpleVertexModelIndex]
   private val indexList = new ListBuffer[SimpleVertexModelIndex]
 
   def onInit() {

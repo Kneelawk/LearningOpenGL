@@ -1,7 +1,6 @@
 package org.kneelawk.learningopengl
 
-import org.joml.Matrix4f
-import org.joml.Vector3f
+import org.joml.{Matrix4f, Vector3f}
 
 class Camera {
   private val view = new Matrix4f()
@@ -12,7 +11,7 @@ class Camera {
   /**
    * Returns the current view-projection matrix.
    */
-  def getMatrix = pv
+  def getMatrix: Matrix4f = pv
 
   /**
    * Recalculates the camera's view-projection matrix.

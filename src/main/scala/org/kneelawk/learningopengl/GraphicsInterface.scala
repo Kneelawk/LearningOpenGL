@@ -1,23 +1,16 @@
 package org.kneelawk.learningopengl
 
 import org.lwjgl.opengl.GL
-import org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT
-import org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT
-import org.lwjgl.opengl.GL11.GL_RENDERER
-import org.lwjgl.opengl.GL11.GL_VENDOR
-import org.lwjgl.opengl.GL11.GL_VERSION
-import org.lwjgl.opengl.GL11.glClear
-import org.lwjgl.opengl.GL11.glClearColor
-import org.lwjgl.opengl.GL11.glGetString
+import org.lwjgl.opengl.GL11._
 
 object GraphicsInterface {
   def setupContext() {
     GL.createCapabilities(true)
-    
+
     val renderer = glGetString(GL_RENDERER)
     val version = glGetString(GL_VERSION)
     val vendor = glGetString(GL_VENDOR)
-    
+
     println(s"GL_RENDERER: $renderer")
     println(s"GL_VERSION: $version")
     println(s"GL_VENDOR: $vendor")

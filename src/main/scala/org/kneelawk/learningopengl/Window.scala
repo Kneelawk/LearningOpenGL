@@ -1,25 +1,7 @@
 package org.kneelawk.learningopengl
 
 import org.lwjgl.glfw.Callbacks.glfwFreeCallbacks
-import org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR
-import org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR
-import org.lwjgl.glfw.GLFW.GLFW_FALSE
-import org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE
-import org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT
-import org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE
-import org.lwjgl.glfw.GLFW.GLFW_TRUE
-import org.lwjgl.glfw.GLFW.GLFW_VISIBLE
-import org.lwjgl.glfw.GLFW.glfwCreateWindow
-import org.lwjgl.glfw.GLFW.glfwDefaultWindowHints
-import org.lwjgl.glfw.GLFW.glfwDestroyWindow
-import org.lwjgl.glfw.GLFW.glfwHideWindow
-import org.lwjgl.glfw.GLFW.glfwMakeContextCurrent
-import org.lwjgl.glfw.GLFW.glfwSetKeyCallback
-import org.lwjgl.glfw.GLFW.glfwSetWindowShouldClose
-import org.lwjgl.glfw.GLFW.glfwShowWindow
-import org.lwjgl.glfw.GLFW.glfwSwapBuffers
-import org.lwjgl.glfw.GLFW.glfwWindowHint
-import org.lwjgl.glfw.GLFW.glfwWindowShouldClose
+import org.lwjgl.glfw.GLFW._
 import org.lwjgl.glfw.GLFWKeyCallbackI
 import org.lwjgl.system.MemoryUtil.NULL
 
@@ -33,17 +15,17 @@ class Window(title: String, width: Int, height: Int) {
    * Sometimes you might be handed a window pointer by one of GLFW's functions.
    * Here you can tell what this window's pointer is for comparison.
    */
-  def windowPtr = window
+  def windowPtr: Long = window
 
   /**
    * The window's width.
    */
-  def getWidth = width
+  def getWidth: Int = width
 
   /**
    * The window's height.
    */
-  def getHeight = height
+  def getHeight: Int = height
 
   /**
    * Destroys the window and frees its resources.
@@ -77,7 +59,7 @@ class Window(title: String, width: Int, height: Int) {
       return false
     }
 
-    return true
+    true
   }
 
   /**
@@ -85,10 +67,8 @@ class Window(title: String, width: Int, height: Int) {
    * Listener args: window-ptr: Long, key: Int, scancode: Int, actions: Int, mods: Int.
    */
   def setKeyCallback(listener: (Long, Int, Int, Int, Int) => Unit) {
-    glfwSetKeyCallback(window, new GLFWKeyCallbackI {
-      def invoke(window: Long, key: Int, scancode: Int, action: Int, mods: Int) {
-        listener(window, key, scancode, action, mods)
-      }
+    glfwSetKeyCallback(window, (window: Long, key: Int, scancode: Int, action: Int, mods: Int) => {
+      listener(window, key, scancode, action, mods)
     })
   }
 
@@ -125,7 +105,7 @@ class Window(title: String, width: Int, height: Int) {
    * How the engine tells whether to keep going or to begin shutdown.
    */
   def shouldWindowClose(): Boolean = {
-    return glfwWindowShouldClose(window)
+    glfwWindowShouldClose(window)
   }
 
   /**

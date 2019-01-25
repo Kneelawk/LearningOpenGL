@@ -1,9 +1,5 @@
 package org.kneelawk.learningopengl
 
-import scala.collection.mutable.HashSet
-import scala.collection.mutable.HashMap
-import scala.reflect.runtime.{ universe => ru }
-
 /*
  * I wonder if you could have all the rendering code be in special
  * implicit ModelRenderers and have each one know how to render a specific kind of model?
@@ -13,14 +9,14 @@ import scala.reflect.runtime.{ universe => ru }
  */
 
 abstract class AbstractRenderEngine[Model <: AnyRef] extends RenderEngine[Model] {
-  protected var update: () => Unit = null
-  protected var window: Window = null
-  protected var camera: Camera = null
+  protected var update: () => Unit = _
+  protected var window: Window = _
+  protected var camera: Camera = _
 
   override def init(window: Window, camera: Camera) {
     this.window = window
     this.camera = camera
-    
+
     onInit()
   }
 
@@ -42,8 +38,8 @@ abstract class AbstractRenderEngine[Model <: AnyRef] extends RenderEngine[Model]
       window.refresh()
     }
   }
-  
+
   protected def onInit()
-  
+
   protected def render()
 }

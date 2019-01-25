@@ -5,13 +5,7 @@ import java.io.InputStream
 import org.kneelawk.learningopengl.ResourceUtil
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL11.GL_TRUE
-import org.lwjgl.opengl.GL20.GL_COMPILE_STATUS
-import org.lwjgl.opengl.GL20.glCompileShader
-import org.lwjgl.opengl.GL20.glCreateShader
-import org.lwjgl.opengl.GL20.glDeleteShader
-import org.lwjgl.opengl.GL20.glGetShaderInfoLog
-import org.lwjgl.opengl.GL20.glGetShaderiv
-import org.lwjgl.opengl.GL20.glShaderSource
+import org.lwjgl.opengl.GL20._
 
 class ShaderComponentSource(source: String, name: String, tpe: ShaderType) {
   def this(is: InputStream, name: String, tpe: ShaderType) = {
@@ -41,17 +35,17 @@ class ShaderComponentSource(source: String, name: String, tpe: ShaderType) {
       throw new FileCompileException(s"Error compiling shader: $name, log: $log, status: $status")
     }
 
-    return new ShaderComponent(id, name, tpe)
+    ShaderComponent(id, name, tpe)
   }
 }
 
 case class ShaderComponent(id: Int, name: String, tpe: ShaderType) {
   private var deleted = false
 
-  def delete() = if (!deleted) {
+  def delete(): Unit = if (!deleted) {
     glDeleteShader(id)
     deleted = true
   }
 
-  override protected def finalize() = delete()
+  override protected def finalize(): Unit = delete()
 }

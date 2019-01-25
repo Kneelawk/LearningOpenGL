@@ -1,20 +1,10 @@
 package org.kneelawk.learningopengl
 
-import org.lwjgl.Version
-import org.lwjgl.glfw.Callbacks._
-import org.lwjgl.glfw.GLFW._
-import org.lwjgl.opengl.GL11._
-import org.lwjgl.system.MemoryUtil._
-import org.lwjgl.glfw.GLFWErrorCallback
-import org.lwjgl.glfw.GLFWKeyCallbackI
-import org.lwjgl.glfw.GLFWVidMode
-import org.lwjgl.opengl.GL
-import org.kneelawk.learningopengl.simple.SimpleVertexModel
-import org.joml.Matrix4f
 import org.kneelawk.learningopengl.simple.SimpleVertexMain
+import org.lwjgl.Version
 
 object LearningOpenGL {
-  val mains = Map[String, AppMain](
+  val mains: Map[String, AppMain] = Map[String, AppMain](
     "simple-vertex" -> SimpleVertexMain)
 
   def main(args: Array[String]) {

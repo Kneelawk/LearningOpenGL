@@ -1,17 +1,12 @@
 package org.kneelawk.learningopengl.buffers
 
-import org.lwjgl.opengl.GL15._
-import org.lwjgl.opengl.GL30._
-import org.lwjgl.opengl.GL31._
+import java.nio._
+
 import org.lwjgl.opengl.ARBInvalidateSubdata._
-import java.nio.ByteBuffer
+import org.lwjgl.opengl.GL15._
+import org.lwjgl.opengl.GL31._
 import org.lwjgl.system.MemoryUtil
-import java.nio.ShortBuffer
-import java.nio.IntBuffer
-import java.nio.LongBuffer
-import java.nio.DoubleBuffer
-import java.nio.FloatBuffer
-import scala.math.Ordering
+
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -59,12 +54,12 @@ class GLArrayBuffer(initialAllocation: Long) {
   /**
    * This buffer's id.
    */
-  def getId = defaultBuf
+  def getId: Int = defaultBuf
 
   /**
    * The current length of this buffer.
    */
-  def getSize = size
+  def getSize: Long = size
 
   /**
    * Set data within this buffer.
@@ -547,7 +542,7 @@ class GLArrayBuffer(initialAllocation: Long) {
       var curSize = size
 
       for (op <- tasks) {
-        val ntask = new ChunkCopyTask(op.offset + op.chunkLen, op.offset, curSize - (op.offset + op.chunkLen))
+        val ntask = ChunkCopyTask(op.offset + op.chunkLen, op.offset, curSize - (op.offset + op.chunkLen))
         // TODO implement me!
       }
     }
@@ -713,4 +708,5 @@ class GLArrayBuffer(initialAllocation: Long) {
   private case class ChunkCopyTask(var sourceOffset: Long, var destOffset: Long, var chunkLen: Long)
 
   private case class ChunkSetTask(var bufOffset: Long, var bufLen: Long, var bufData: Long, var destOffset: Long)
+
 }

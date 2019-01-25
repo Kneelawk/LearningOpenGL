@@ -1,18 +1,13 @@
 package org.kneelawk.learningopengl.simple
 
 import org.joml.Matrix4f
-import org.kneelawk.learningopengl.AppMain
-import org.kneelawk.learningopengl.Camera
-import org.kneelawk.learningopengl.GraphicsInterface
-import org.kneelawk.learningopengl.SystemInterface
-import org.kneelawk.learningopengl.Window
-import org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE
-import org.lwjgl.glfw.GLFW.GLFW_RELEASE
+import org.kneelawk.learningopengl._
+import org.lwjgl.glfw.GLFW.{GLFW_KEY_ESCAPE, GLFW_RELEASE}
 
 object SimpleVertexMain extends AppMain {
   val width = 1280
   val height = 720
-  val triangle = new SimpleVertexModel(Array(
+  val triangle = SimpleVertexModel(Array(
     -1, -1, 0,
     1, -1, 0,
     0, 1, 0), new Matrix4f)
@@ -23,7 +18,7 @@ object SimpleVertexMain extends AppMain {
 
       val window = new Window("Learning OpenGL - SimpleVertex", 1280, 720)
       window.init()
-      window.setKeyCallback((windowPtr, key, scancode, action, mods) =>
+      window.setKeyCallback((_, key, _, action, _) =>
         if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) window.requestClose())
       window.selectContext()
       window.show()

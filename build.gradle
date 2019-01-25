@@ -9,30 +9,30 @@ ext.lwjglVersion = '3.2.0'
 ext.jomlVersion = '1.9.12'
 
 repositories {
-	jcenter()
+    jcenter()
 }
 
 dependencies {
-	implementation "org.scala-lang:scala-library:$scalaVersion"
-	implementation "org.scala-lang:scala-reflect:$scalaVersion"
-	implementation "org.lwjgl:lwjgl:$lwjglVersion"
-	implementation "org.lwjgl:lwjgl-opengl:$lwjglVersion"
-	implementation "org.lwjgl:lwjgl-glfw:$lwjglVersion"
-	implementation "org.lwjgl:lwjgl-stb:$lwjglVersion"
-	implementation "org.joml:joml:$jomlVersion"
+    implementation "org.scala-lang:scala-library:$scalaVersion"
+    implementation "org.scala-lang:scala-reflect:$scalaVersion"
+    implementation "org.lwjgl:lwjgl:$lwjglVersion"
+    implementation "org.lwjgl:lwjgl-opengl:$lwjglVersion"
+    implementation "org.lwjgl:lwjgl-glfw:$lwjglVersion"
+    implementation "org.lwjgl:lwjgl-stb:$lwjglVersion"
+    implementation "org.joml:joml:$jomlVersion"
 
-	runtime "org.lwjgl:lwjgl:$lwjglVersion:natives-linux"
-	runtime "org.lwjgl:lwjgl:$lwjglVersion:natives-macos"
-	runtime "org.lwjgl:lwjgl:$lwjglVersion:natives-windows"
-	runtime "org.lwjgl:lwjgl-opengl:$lwjglVersion:natives-linux"
-	runtime "org.lwjgl:lwjgl-opengl:$lwjglVersion:natives-macos"
-	runtime "org.lwjgl:lwjgl-opengl:$lwjglVersion:natives-windows"
-	runtime "org.lwjgl:lwjgl-glfw:$lwjglVersion:natives-linux"
-	runtime "org.lwjgl:lwjgl-glfw:$lwjglVersion:natives-macos"
-	runtime "org.lwjgl:lwjgl-glfw:$lwjglVersion:natives-windows"
-	runtime "org.lwjgl:lwjgl-stb:$lwjglVersion:natives-linux"
-	runtime "org.lwjgl:lwjgl-stb:$lwjglVersion:natives-macos"
-	runtime "org.lwjgl:lwjgl-stb:$lwjglVersion:natives-windows"
+    runtime "org.lwjgl:lwjgl:$lwjglVersion:natives-linux"
+    runtime "org.lwjgl:lwjgl:$lwjglVersion:natives-macos"
+    runtime "org.lwjgl:lwjgl:$lwjglVersion:natives-windows"
+    runtime "org.lwjgl:lwjgl-opengl:$lwjglVersion:natives-linux"
+    runtime "org.lwjgl:lwjgl-opengl:$lwjglVersion:natives-macos"
+    runtime "org.lwjgl:lwjgl-opengl:$lwjglVersion:natives-windows"
+    runtime "org.lwjgl:lwjgl-glfw:$lwjglVersion:natives-linux"
+    runtime "org.lwjgl:lwjgl-glfw:$lwjglVersion:natives-macos"
+    runtime "org.lwjgl:lwjgl-glfw:$lwjglVersion:natives-windows"
+    runtime "org.lwjgl:lwjgl-stb:$lwjglVersion:natives-linux"
+    runtime "org.lwjgl:lwjgl-stb:$lwjglVersion:natives-macos"
+    runtime "org.lwjgl:lwjgl-stb:$lwjglVersion:natives-windows"
 }
 
 application {
