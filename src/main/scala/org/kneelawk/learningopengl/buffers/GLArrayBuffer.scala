@@ -350,6 +350,8 @@ class GLArrayBuffer(initialAllocation: Long) {
       tempHolder.put(defaultBufData)
       // set the temp buffer's limit to it's current position and its position to 0 so it can be read back into the default buffer
       tempHolder.flip()
+      // set the cpu side buffer's limit back to its capacity
+      defaultBufData.limit(defaultBufData.capacity())
       // get the chunk's buffer
       val chunkBuffer = MemoryUtil.memByteBuffer(chunk.bufData, chunk.bufLen)
       // setup the default cpu side buffer to be written to
@@ -683,7 +685,10 @@ class GLArrayBuffer(initialAllocation: Long) {
 
     // if a resize is needed then resize and copy all the data back from the temp buffer
     if (chunkEnd > maxSize) {
-      maxSize *= 2
+
+      // keep growing until we're big enough
+      while (chunkEnd > maxSize)
+        maxSize *= 2
 
       // allocate new space for the default buffer
       glBufferData(GL_COPY_WRITE_BUFFER, maxSize, GL_DYNAMIC_DRAW)
@@ -719,7 +724,10 @@ class GLArrayBuffer(initialAllocation: Long) {
 
     // if a resize is needed then resize and copy all the data back from the temp buffer
     if (lastChunkEnd > maxSize) {
-      maxSize *= 2
+
+      // keep growing until we're big enough
+      while (lastChunkEnd > maxSize)
+        maxSize *= 2
 
       // allocate new space for the default buffer
       glBufferData(GL_COPY_WRITE_BUFFER, maxSize, GL_DYNAMIC_DRAW)
