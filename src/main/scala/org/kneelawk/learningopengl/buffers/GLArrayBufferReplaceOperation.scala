@@ -7,7 +7,7 @@ import org.lwjgl.system.MemoryUtil
 /**
  * Object representing a replace operation.
  */
-class GLArrayBufferReplaceOperation(offset: Long, chunkLen: Long, bufLen: Long, bufData: Long) {
+case class GLArrayBufferReplaceOperation(offset: Long, chunkLen: Long, bufLen: Long, bufData: Long) {
 
   if (offset < 0)
     throw new IllegalArgumentException("The offset cannot be negative")

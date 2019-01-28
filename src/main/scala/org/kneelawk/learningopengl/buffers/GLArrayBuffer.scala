@@ -5,9 +5,7 @@ import java.nio._
 import org.lwjgl.opengl.ARBInvalidateSubdata._
 import org.lwjgl.opengl.GL15._
 import org.lwjgl.opengl.GL31._
-import org.lwjgl.system.MemoryUtil
-
-import scala.collection.mutable.ListBuffer
+import org.lwjgl.system.MemoryUtil._
 
 /**
  * Object and utilities for managing buffer objects.
@@ -67,7 +65,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * ByteBuffer version.
    */
   def set(offset: Long, buf: ByteBuffer) {
-    setNative(offset, buf.remaining(), MemoryUtil.memAddress(buf))
+    setNative(offset, buf.remaining(), memAddress(buf))
   }
 
   /**
@@ -76,7 +74,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * ShortBuffer version.
    */
   def set(offset: Long, buf: ShortBuffer) {
-    setNative(offset, buf.remaining() << 1, MemoryUtil.memAddress(buf))
+    setNative(offset, buf.remaining() << 1, memAddress(buf))
   }
 
   /**
@@ -85,7 +83,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * IntBuffer version.
    */
   def set(offset: Long, buf: IntBuffer) {
-    setNative(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+    setNative(offset, buf.remaining() << 2, memAddress(buf))
   }
 
   /**
@@ -94,7 +92,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * LongBuffer version.
    */
   def set(offset: Long, buf: LongBuffer) {
-    setNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+    setNative(offset, buf.remaining() << 3, memAddress(buf))
   }
 
   /**
@@ -103,7 +101,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * FloatBuffer version.
    */
   def set(offset: Long, buf: FloatBuffer) {
-    setNative(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+    setNative(offset, buf.remaining() << 2, memAddress(buf))
   }
 
   /**
@@ -112,7 +110,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * DoubleBuffer version.
    */
   def set(offset: Long, buf: DoubleBuffer) {
-    setNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+    setNative(offset, buf.remaining() << 3, memAddress(buf))
   }
 
   /**
@@ -151,25 +149,20 @@ class GLArrayBuffer(initialAllocation: Long) {
     glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
 
     // allocate a client side buffer to operate on
-    val defaultBufData = MemoryUtil.memAlloc(lastChunkEnd)
+    val defaultBufData = nmemAllocChecked(lastChunkEnd)
     // copy the graphics side buffer to the client side buffer
-    glGetBufferSubData(GL_ARRAY_BUFFER, 0, defaultBufData)
+    nglGetBufferSubData(GL_ARRAY_BUFFER, 0, lastChunkEnd, defaultBufData)
 
     // perform every operation on the client side buffer
     for (chunk <- tasks) {
-      val chunkBuf = MemoryUtil.memByteBuffer(chunk.bufData, chunk.bufLen)
-      defaultBufData.position(chunk.offset)
-      defaultBufData.put(chunkBuf)
+      memCopy(defaultBufData + chunk.offset, chunk.bufData, chunk.bufLen)
     }
 
-    // move the position of the client buffer back to the beginning
-    defaultBufData.rewind()
-
     // copy the client side buffer back to the graphics side buffer
-    glBufferSubData(GL_ARRAY_BUFFER, 0, defaultBufData)
+    nglBufferSubData(GL_ARRAY_BUFFER, 0, lastChunkEnd, defaultBufData)
 
     // free the client side buffer
-    MemoryUtil.memFree(defaultBufData)
+    nmemFree(defaultBufData)
 
     // extend the size
     if (lastChunkEnd > size) {
@@ -182,7 +175,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * ByteBuffer version.
    */
   def append(buf: ByteBuffer) {
-    appendNative(buf.remaining(), MemoryUtil.memAddress(buf))
+    appendNative(buf.remaining(), memAddress(buf))
   }
 
   /**
@@ -190,7 +183,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * ShortBuffer version.
    */
   def append(buf: ShortBuffer) {
-    appendNative(buf.remaining() << 1, MemoryUtil.memAddress(buf))
+    appendNative(buf.remaining() << 1, memAddress(buf))
   }
 
   /**
@@ -198,7 +191,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * IntBuffer version.
    */
   def append(buf: IntBuffer) {
-    appendNative(buf.remaining() << 2, MemoryUtil.memAddress(buf))
+    appendNative(buf.remaining() << 2, memAddress(buf))
   }
 
   /**
@@ -206,7 +199,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * LongBuffer version.
    */
   def append(buf: LongBuffer) {
-    appendNative(buf.remaining() << 3, MemoryUtil.memAddress(buf))
+    appendNative(buf.remaining() << 3, memAddress(buf))
   }
 
   /**
@@ -214,7 +207,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * FloatBuffer version.
    */
   def append(buf: FloatBuffer) {
-    appendNative(buf.remaining() << 2, MemoryUtil.memAddress(buf))
+    appendNative(buf.remaining() << 2, memAddress(buf))
   }
 
   /**
@@ -222,7 +215,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * DoubleBuffer version.
    */
   def append(buf: DoubleBuffer) {
-    appendNative(buf.remaining() << 3, MemoryUtil.memAddress(buf))
+    appendNative(buf.remaining() << 3, memAddress(buf))
   }
 
   /**
@@ -246,7 +239,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * ByteBuffer version.
    */
   def insert(offset: Long, buf: ByteBuffer) {
-    insertNative(offset, buf.remaining(), MemoryUtil.memAddress(buf))
+    insertNative(offset, buf.remaining(), memAddress(buf))
   }
 
   /**
@@ -255,7 +248,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * ShortBuffer version.
    */
   def insert(offset: Long, buf: ShortBuffer) {
-    insertNative(offset, buf.remaining() << 1, MemoryUtil.memAddress(buf))
+    insertNative(offset, buf.remaining() << 1, memAddress(buf))
   }
 
   /**
@@ -264,7 +257,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * IntBuffer version.
    */
   def insert(offset: Long, buf: IntBuffer) {
-    insertNative(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+    insertNative(offset, buf.remaining() << 2, memAddress(buf))
   }
 
   /**
@@ -273,7 +266,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * LongBuffer version.
    */
   def insert(offset: Long, buf: LongBuffer) {
-    insertNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+    insertNative(offset, buf.remaining() << 3, memAddress(buf))
   }
 
   /**
@@ -282,7 +275,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * FloatBuffer version.
    */
   def insert(offset: Long, buf: FloatBuffer) {
-    insertNative(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+    insertNative(offset, buf.remaining() << 2, memAddress(buf))
   }
 
   /**
@@ -291,7 +284,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * DoubleBuffer version.
    */
   def insert(offset: Long, buf: DoubleBuffer) {
-    insertNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+    insertNative(offset, buf.remaining() << 3, memAddress(buf))
   }
 
   /**
@@ -321,7 +314,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    */
   def insertChunks(tasks: Seq[GLArrayBufferInsertOperation]) {
     // calculate the size of the new buffer
-    val newSize = tasks.foldLeft(size.toInt)((a, b) => a + b.bufLen)
+    val newSize = tasks.foldLeft(size)((a, b) => a + b.bufLen)
 
     // make sure this buffer is large enough
     extendToPoint(newSize)
@@ -330,49 +323,33 @@ class GLArrayBuffer(initialAllocation: Long) {
     glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
 
     // allocate a cpu side buffer for the data
-    val defaultBufData = MemoryUtil.memAlloc(newSize)
+    val defaultBufData = nmemAllocChecked(newSize)
     // allocate a temp cpu side buffer for the data
-    val tempHolder = MemoryUtil.memAlloc(newSize)
+    val tempHolder = nmemAllocChecked(newSize)
     // copy the data from the graphics side buffer to the cpu side buffer
-    glGetBufferSubData(GL_ARRAY_BUFFER, 0, defaultBufData)
+    nglGetBufferSubData(GL_ARRAY_BUFFER, 0, newSize, defaultBufData)
 
     // this keeps track of the current size as we grow it
-    var currentSize = size.toInt
+    var currentSize = size
 
     // apply every operation in sequence
     for (chunk <- tasks) {
-      // reset the temp cpu side buffer
-      tempHolder.clear()
-      // setup the default cpu side buffer to be read from
-      defaultBufData.position(chunk.offset)
-      defaultBufData.limit(currentSize)
       // read the data after the insert into the temp cpu side buffer
-      tempHolder.put(defaultBufData)
-      // set the temp buffer's limit to it's current position and its position to 0 so it can be read back into the default buffer
-      tempHolder.flip()
-      // set the cpu side buffer's limit back to its capacity
-      defaultBufData.limit(defaultBufData.capacity())
-      // get the chunk's buffer
-      val chunkBuffer = MemoryUtil.memByteBuffer(chunk.bufData, chunk.bufLen)
-      // setup the default cpu side buffer to be written to
-      defaultBufData.position(chunk.offset)
+      memCopy(defaultBufData + chunk.offset, tempHolder, currentSize - chunk.offset)
       // write the inserted data to the default cpu side buffer
-      defaultBufData.put(chunkBuffer)
+      memCopy(chunk.bufData, defaultBufData + chunk.offset, chunk.bufLen)
       // write the temp buffer's content after the inserted data
-      defaultBufData.put(tempHolder)
+      memCopy(tempHolder, defaultBufData + chunk.offset + chunk.bufLen, currentSize - chunk.offset)
       // keep track of buffer size increases
       currentSize += chunk.bufLen
     }
 
-    // set the default client side buffer's position to 0 so it can be read
-    defaultBufData.rewind()
-
     // copy the the data from the cpu side buffer back to the graphics side buffer
-    glBufferSubData(GL_ARRAY_BUFFER, 0, defaultBufData)
+    nglBufferSubData(GL_ARRAY_BUFFER, 0, newSize, defaultBufData)
 
     // free our buffers now that we're done with them
-    MemoryUtil.memFree(defaultBufData)
-    MemoryUtil.memFree(tempHolder)
+    nmemFree(defaultBufData)
+    nmemFree(tempHolder)
 
     // set the buffer size field
     size = newSize
@@ -383,7 +360,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * ByteBuffer version.
    */
   def replace(offset: Long, chunkLen: Long, buf: ByteBuffer) {
-    replaceNative(offset, chunkLen, buf.remaining(), MemoryUtil.memAddress(buf))
+    replaceNative(offset, chunkLen, buf.remaining(), memAddress(buf))
   }
 
   /**
@@ -391,7 +368,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * ShortBuffer version.
    */
   def replace(offset: Long, chunkLen: Long, buf: ShortBuffer) {
-    replaceNative(offset, chunkLen, buf.remaining() << 1, MemoryUtil.memAddress(buf))
+    replaceNative(offset, chunkLen, buf.remaining() << 1, memAddress(buf))
   }
 
   /**
@@ -399,7 +376,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * IntBuffer version.
    */
   def replace(offset: Long, chunkLen: Long, buf: IntBuffer) {
-    replaceNative(offset, chunkLen, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+    replaceNative(offset, chunkLen, buf.remaining() << 2, memAddress(buf))
   }
 
   /**
@@ -407,7 +384,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * LongBuffer version.
    */
   def replace(offset: Long, chunkLen: Long, buf: LongBuffer) {
-    replaceNative(offset, chunkLen, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+    replaceNative(offset, chunkLen, buf.remaining() << 3, memAddress(buf))
   }
 
   /**
@@ -415,7 +392,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * FloatBuffer version.
    */
   def replace(offset: Long, chunkLen: Long, buf: FloatBuffer) {
-    replaceNative(offset, chunkLen, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+    replaceNative(offset, chunkLen, buf.remaining() << 2, memAddress(buf))
   }
 
   /**
@@ -423,7 +400,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * DoubleBuffer version.
    */
   def replace(offset: Long, chunkLen: Long, buf: DoubleBuffer) {
-    replaceNative(offset, chunkLen, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+    replaceNative(offset, chunkLen, buf.remaining() << 3, memAddress(buf))
   }
 
   /**
@@ -457,8 +434,89 @@ class GLArrayBuffer(initialAllocation: Long) {
     }
   }
 
+  /**
+   * Bulk replacement of chunks of data within the buffer.
+   *
+   * @param tasks The sequence of every operation to perform on the buffer
+   */
   def replaceChunks(tasks: Seq[GLArrayBufferReplaceOperation]) {
-    // TODO implement me!
+    // calculate the new size of the buffer after every operation has been performed
+    var maxSize = size
+    var newSize = size
+    tasks.foreach { chunk =>
+      newSize +=
+        // make sure to properly manage the replacement of chunks extending beyond the end of the buffer
+        (if (chunk.offset + chunk.chunkLen > newSize) {
+          chunk.bufLen - (newSize - chunk.offset)
+        } else {
+          chunk.bufLen - chunk.chunkLen
+        })
+
+      // keep track of the largest the buffer will need to get
+      if (newSize > maxSize) {
+        maxSize = newSize
+      }
+    }
+
+    if (newSize <= 0) {
+      // if performing every operation would result in a buffer with length 0, then simply clear the buffer
+      clear()
+    } else {
+      // make sure the graphics side buffer is large enough
+      extendToPoint(newSize)
+
+      // bind the default buffer
+      glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
+
+      // allocate a cpu side buffer to perform each operation on
+      val defaultBufData = nmemAllocChecked(maxSize)
+      // allocate a temp cpu side buffer to help with the operations
+      val tempHolder = nmemAllocChecked(maxSize)
+      // copy all the data from the graphics side buffer to the cpu side buffer
+      nglGetBufferSubData(GL_ARRAY_BUFFER, 0, size, defaultBufData)
+
+      // keep track of the curent size of the cpu side buffer
+      var currentSize = size
+
+      // perform every operation in order
+      for (chunk <- tasks) {
+        if (chunk.offset + chunk.chunkLen < currentSize) {
+          // if the end of the region to be replaced does not extend beyond the end of the current state of the cpu side
+          // buffer, then simply make room for the new data and copy it in
+          if (chunk.bufLen - chunk.chunkLen != 0) {
+            // if there is a difference between the size of the chunk to be replaced and that of the data to replace it
+            // with, then move the data after the end of the chunk to be replaced to the end of where the new data will
+            // be inserted
+            memCopy(defaultBufData + chunk.offset + chunk.chunkLen, tempHolder, currentSize - (chunk.offset + chunk.chunkLen))
+            memCopy(tempHolder, defaultBufData + chunk.offset + chunk.bufLen, currentSize - (chunk.offset + chunk.chunkLen))
+          }
+          // copy the new data into the cpu side buffer
+          memCopy(chunk.bufData, defaultBufData + chunk.offset, chunk.bufLen)
+          // adjust the current size of the cpu buffer
+          currentSize += chunk.bufLen - chunk.chunkLen
+        } else {
+          // if the end of the region to be replaced does extend beyond the end of the current state of the cpu side
+          // buffer, then there is no need to make room for the new data
+
+          // copy the new data into the cpu side buffer
+          memCopy(chunk.bufData, defaultBufData + chunk.offset, chunk.bufLen)
+          // set the current size to the end of the inserted data because the region to be replaced extended beyond the
+          // end of the old current size so the end of new current size is simply the end of the region the new data was
+          // copied to
+          currentSize = chunk.offset + chunk.bufLen
+        }
+      }
+
+      // copy the cpu side buffer data back into the graphics side buffer
+      nglBufferSubData(GL_ARRAY_BUFFER, 0, newSize, defaultBufData)
+
+      // free the cpu side buffers
+      nmemFree(defaultBufData)
+      nmemFree(tempHolder)
+
+      // update the current size of the buffer accounting for all the operations performed
+      size = newSize
+    }
   }
 
   /**
@@ -466,7 +524,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * ByteBuffer version.
    */
   def replaceAfter(offset: Long, buf: ByteBuffer) {
-    replaceAfterNative(offset, buf.remaining(), MemoryUtil.memAddress(buf))
+    replaceAfterNative(offset, buf.remaining(), memAddress(buf))
   }
 
   /**
@@ -474,7 +532,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * ShortBuffer version.
    */
   def replaceAfter(offset: Long, buf: ShortBuffer) {
-    replaceAfterNative(offset, buf.remaining() << 1, MemoryUtil.memAddress(buf))
+    replaceAfterNative(offset, buf.remaining() << 1, memAddress(buf))
   }
 
   /**
@@ -482,7 +540,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * IntBuffer version.
    */
   def replaceAfter(offset: Long, buf: IntBuffer) {
-    replaceAfterNative(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+    replaceAfterNative(offset, buf.remaining() << 2, memAddress(buf))
   }
 
   /**
@@ -490,7 +548,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * LongBuffer version.
    */
   def replaceAfter(offset: Long, buf: LongBuffer) {
-    replaceAfterNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+    replaceAfterNative(offset, buf.remaining() << 3, memAddress(buf))
   }
 
   /**
@@ -498,7 +556,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * FloatBuffer version.
    */
   def replaceAfter(offset: Long, buf: FloatBuffer) {
-    replaceAfterNative(offset, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+    replaceAfterNative(offset, buf.remaining() << 2, memAddress(buf))
   }
 
   /**
@@ -506,7 +564,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * DoubleBuffer version.
    */
   def replaceAfter(offset: Long, buf: DoubleBuffer) {
-    replaceAfterNative(offset, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+    replaceAfterNative(offset, buf.remaining() << 3, memAddress(buf))
   }
 
   /**
@@ -532,7 +590,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * ByteBuffer version.
    */
   def replaceBefore(cutoff: Long, buf: ByteBuffer) {
-    replaceBeforeNative(cutoff, buf.remaining(), MemoryUtil.memAddress(buf))
+    replaceBeforeNative(cutoff, buf.remaining(), memAddress(buf))
   }
 
   /**
@@ -540,7 +598,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * ShortBuffer version.
    */
   def replaceBefore(cutoff: Long, buf: ShortBuffer) {
-    replaceBeforeNative(cutoff, buf.remaining() << 1, MemoryUtil.memAddress(buf))
+    replaceBeforeNative(cutoff, buf.remaining() << 1, memAddress(buf))
   }
 
   /**
@@ -548,7 +606,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * IntBuffer version.
    */
   def replaceBefore(cutoff: Long, buf: IntBuffer) {
-    replaceBeforeNative(cutoff, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+    replaceBeforeNative(cutoff, buf.remaining() << 2, memAddress(buf))
   }
 
   /**
@@ -556,7 +614,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * LongBuffer version.
    */
   def replaceBefore(cutoff: Long, buf: LongBuffer) {
-    replaceBeforeNative(cutoff, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+    replaceBeforeNative(cutoff, buf.remaining() << 3, memAddress(buf))
   }
 
   /**
@@ -564,7 +622,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * FloatBuffer version.
    */
   def replaceBefore(cutoff: Long, buf: FloatBuffer) {
-    replaceBeforeNative(cutoff, buf.remaining() << 2, MemoryUtil.memAddress(buf))
+    replaceBeforeNative(cutoff, buf.remaining() << 2, memAddress(buf))
   }
 
   /**
@@ -572,7 +630,7 @@ class GLArrayBuffer(initialAllocation: Long) {
    * DoubleBuffer version.
    */
   def replaceBefore(cutoff: Long, buf: DoubleBuffer) {
-    replaceBeforeNative(cutoff, buf.remaining() << 3, MemoryUtil.memAddress(buf))
+    replaceBeforeNative(cutoff, buf.remaining() << 3, memAddress(buf))
   }
 
   /**
@@ -614,19 +672,52 @@ class GLArrayBuffer(initialAllocation: Long) {
     }
   }
 
+  /**
+   * Bulk remove chunks from this buffer.
+   *
+   * @param tasks The sequence of remove operations to be performed.
+   */
   def removeChunks(tasks: Seq[GLArrayBufferRemoveOperation]) {
+    // calculate the new size of the buffer after every operations has been completed
     val newSize = tasks.foldLeft(size)((a, op) => a - op.chunkLen)
 
     if (newSize <= 0) {
+      // if the sequence of operations would result in a length of 0, then simply clear the buffer
       clear()
     } else {
-      val copyTasks = new ListBuffer[ChunkCopyTask]
+      // bind the buffer
+      glBindBuffer(GL_ARRAY_BUFFER, defaultBuf)
+
+      // allocate a cpu side buffer to perform operations on
+      val defaultBufData = nmemAlloc(size)
+      // allocate a temp buffer to help with the operations
+      val tempHolder = nmemAlloc(size)
+      // copy all data from the graphic side buffer to the cpu side buffer
+      nglGetBufferSubData(GL_ARRAY_BUFFER, 0, size, defaultBufData)
+
+      // keep track of the current size of the buffer
       var curSize = size
 
+      // perform every operation on the cpu side buffer
       for (op <- tasks) {
-        val ntask = ChunkCopyTask(op.offset + op.chunkLen, op.offset, curSize - (op.offset + op.chunkLen))
-        // TODO implement me!
+        // copy the section after the chunk to be removed into the temp cpu buffer
+        memCopy(defaultBufData + op.offset + op.chunkLen, tempHolder, curSize - (op.offset + op.chunkLen))
+        // copy the section after the chunk to be removed back from the temp buffer to the start position of the chunk
+        // to be removed
+        memCopy(tempHolder, defaultBufData + op.offset, curSize - (op.offset + op.chunkLen))
+        // update the current size accounting for the chunk removal
+        curSize -= op.chunkLen
       }
+
+      // copy the completed cpu side buffer data back to the graphics buffer
+      nglBufferSubData(GL_ARRAY_BUFFER, 0, newSize, defaultBufData)
+
+      // free the cpu side buffers
+      nmemFree(defaultBufData)
+      nmemFree(tempHolder)
+
+      // update the buffer's size accounting for all the removals
+      size = newSize
     }
   }
 
