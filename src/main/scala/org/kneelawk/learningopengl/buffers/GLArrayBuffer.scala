@@ -475,7 +475,7 @@ class GLArrayBuffer(initialAllocation: Long) {
       // copy all the data from the graphics side buffer to the cpu side buffer
       nglGetBufferSubData(GL_ARRAY_BUFFER, 0, size, defaultBufData)
 
-      // keep track of the curent size of the cpu side buffer
+      // keep track of the current size of the cpu side buffer
       var currentSize = size
 
       // perform every operation in order

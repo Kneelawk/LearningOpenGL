@@ -19,7 +19,7 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
 
   private val vertices = new GLArrayBuffer
   private val matrices = new GLArrayBuffer
-  private val indecies = new mutable.HashMap[SimpleVertexModel, SimpleVertexModelIndex]
+  private val indices = new mutable.HashMap[SimpleVertexModel, SimpleVertexModelIndex]
   private val indexList = new ListBuffer[SimpleVertexModelIndex]
 
   def onInit() {
@@ -32,32 +32,32 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
   }
 
   def addModel(model: SimpleVertexModel) {
-    if (indecies.contains(model)) {
+    if (indices.contains(model)) {
       return
     }
 
     val index = SimpleVertexModelIndex(vertices.getSize, matrices.getSize)
 
-    val vertbuf = BufferUtils.createFloatBuffer(model.vertexData.length)
-    vertbuf.put(model.vertexData)
-    vertbuf.flip()
-    vertices.append(vertbuf)
+    val vertBuf = BufferUtils.createFloatBuffer(model.vertexData.length)
+    vertBuf.put(model.vertexData)
+    vertBuf.flip()
+    vertices.append(vertBuf)
 
     val matBuf = BufferUtils.createFloatBuffer(16)
     model.model.get(matBuf)
     matBuf.flip()
     matrices.append(matBuf)
 
-    indecies += ((model, index))
+    indices += ((model, index))
     indexList += index
   }
 
   def removeModel(model: SimpleVertexModel) {
-    if (!indecies.contains(model)) {
+    if (!indices.contains(model)) {
       return
     }
 
-    val index = indecies(model)
+    val index = indices(model)
     val vertLen = model.vertexData.length << 2
     val matLen = 16 << 2
 
@@ -75,7 +75,7 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
   def clearModels() {
     vertices.clear()
     matrices.clear()
-    indecies.clear()
+    indices.clear()
     indexList.clear()
   }
 

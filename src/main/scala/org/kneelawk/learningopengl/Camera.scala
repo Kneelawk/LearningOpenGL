@@ -37,6 +37,7 @@ class Camera {
   /**
    * Sets the camera's projection fovy, aspect ratio, z-near, and z-far.
    */
+  //noinspection SpellCheckingInspection,SpellCheckingInspection
   def setProjection(fovy: Float, aspect: Float, zNear: Float, zFar: Float) {
     projection.setPerspective(fovy, aspect, zNear, zFar)
   }
