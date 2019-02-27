@@ -1,7 +1,5 @@
 package org.kneelawk.learningopengl.simple
 
-import java.nio.Buffer
-
 import org.kneelawk.learningopengl.buffers.GLArrayBuffer
 import org.kneelawk.learningopengl.util.ResourceUtils
 import org.kneelawk.learningopengl.util.ResourceUtils.tryWith
@@ -11,7 +9,6 @@ import org.lwjgl.system.{MemoryStack, MemoryUtil}
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
-import scala.util.control.NonFatal
 
 class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
   // setup clear color
@@ -47,7 +44,7 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
       vertBuf.put(model.vertexData)
       vertBuf.flip()
       vertices.append(vertBuf)
-    } (MemoryUtil.memFree(_))
+    }(MemoryUtil.memFree(_))
 
     tryWith(MemoryStack.stackPush()) { stack =>
       val matBuf = stack.mallocFloat(16)

@@ -2,7 +2,6 @@ package org.kneelawk.learningopengl
 
 import org.lwjgl.glfw.Callbacks.glfwFreeCallbacks
 import org.lwjgl.glfw.GLFW._
-import org.lwjgl.glfw.GLFWKeyCallbackI
 import org.lwjgl.system.MemoryUtil.NULL
 
 /**

@@ -5,7 +5,6 @@ import org.lwjgl.opengl.GL11._
 import org.lwjgl.opengl.GL20._
 
 import scala.collection.{TraversableOnce, mutable}
-import scala.collection.mutable.HashSet
 
 class UnlinkedShaderProgram(name: String) {
   private val components = new mutable.HashSet[ShaderComponent]
@@ -16,11 +15,17 @@ class UnlinkedShaderProgram(name: String) {
 
   def -=(component: ShaderComponent): this.type = remove(component)
 
-  def add(component: ShaderComponent): this.type = { components += component; this }
+  def add(component: ShaderComponent): this.type = {
+    components += component; this
+  }
 
-  def add(componentSet: TraversableOnce[ShaderComponent]): this.type = { components ++= componentSet; this }
+  def add(componentSet: TraversableOnce[ShaderComponent]): this.type = {
+    components ++= componentSet; this
+  }
 
-  def remove(component: ShaderComponent): this.type = { components -= component; this }
+  def remove(component: ShaderComponent): this.type = {
+    components -= component; this
+  }
 
   @throws[ProgramLinkException]("if there is an error while linking this shader program")
   def link(): ShaderProgram = {
