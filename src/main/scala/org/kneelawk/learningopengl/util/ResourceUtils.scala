@@ -38,4 +38,64 @@ object ResourceUtils {
       }
     }
   }
+
+  def tryWithDestroyer[Resource >: Null, Result](creator: => Resource)(block: Resource => Result)(destroyer: Resource => Unit): Result = {
+    var resource: Resource = null
+    var exception: Throwable = null
+    try {
+      resource = creator
+      block(resource)
+    } catch {
+      case NonFatal(e) =>
+        exception = e
+        throw e
+    } finally {
+      if (resource != null) {
+        if (exception != null) {
+          try {
+            destroyer(resource)
+          } catch {
+            case NonFatal(e) =>
+              exception.addSuppressed(e)
+          }
+        } else {
+          destroyer(resource)
+        }
+      }
+    }
+  }
+
+  def tryWithCheckedDestroyer[Resource >: Null, Result](creator: => Resource)(block: Resource => Result)(destroyer: (Resource, Throwable => Unit) => Unit): Result = {
+    var resource: Resource = null
+    var exception: Throwable = null
+    try {
+      resource = creator
+      block(resource)
+    } catch {
+      case NonFatal(e) =>
+        exception = e
+        throw e
+    } finally {
+      if (resource != null) {
+        if (exception != null) {
+          try {
+            destroyer(resource, { e =>
+              exception.addSuppressed(e)
+            })
+          } catch {
+            case NonFatal(e) =>
+              exception.addSuppressed(e)
+          }
+        } else {
+          destroyer(resource, { e =>
+            if (exception != null) {
+              exception.addSuppressed(e)
+            } else {
+              exception = e
+            }
+          })
+        }
+      }
+    }
+  }
 }

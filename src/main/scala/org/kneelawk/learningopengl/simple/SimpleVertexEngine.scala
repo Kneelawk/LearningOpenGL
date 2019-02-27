@@ -1,12 +1,17 @@
 package org.kneelawk.learningopengl.simple
 
+import java.nio.Buffer
+
 import org.kneelawk.learningopengl.buffers.GLArrayBuffer
+import org.kneelawk.learningopengl.util.ResourceUtils
+import org.kneelawk.learningopengl.util.ResourceUtils.tryWith
 import org.kneelawk.learningopengl.{AbstractRenderEngine, GraphicsInterface}
-import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL30.{glBindVertexArray, glDeleteVertexArrays, glGenVertexArrays}
+import org.lwjgl.system.{MemoryStack, MemoryUtil}
 
 import scala.collection.mutable
-import scala.collection.mutable.{HashMap, ListBuffer}
+import scala.collection.mutable.ListBuffer
+import scala.util.control.NonFatal
 
 class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
   // setup clear color
@@ -38,15 +43,18 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
 
     val index = SimpleVertexModelIndex(vertices.getSize, matrices.getSize)
 
-    val vertBuf = BufferUtils.createFloatBuffer(model.vertexData.length)
-    vertBuf.put(model.vertexData)
-    vertBuf.flip()
-    vertices.append(vertBuf)
+    ResourceUtils.tryWithDestroyer(MemoryUtil.memAllocFloat(model.vertexData.length)) { vertBuf =>
+      vertBuf.put(model.vertexData)
+      vertBuf.flip()
+      vertices.append(vertBuf)
+    } (MemoryUtil.memFree(_))
 
-    val matBuf = BufferUtils.createFloatBuffer(16)
-    model.model.get(matBuf)
-    matBuf.flip()
-    matrices.append(matBuf)
+    tryWith(MemoryStack.stackPush()) { stack =>
+      val matBuf = stack.mallocFloat(16)
+      model.model.get(matBuf)
+      matBuf.flip()
+      matrices.append(matBuf)
+    }
 
     indices += ((model, index))
     indexList += index

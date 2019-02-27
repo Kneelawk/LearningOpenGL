@@ -10,17 +10,17 @@ import scala.collection.mutable.HashSet
 class UnlinkedShaderProgram(name: String) {
   private val components = new mutable.HashSet[ShaderComponent]
 
-  def +=(component: ShaderComponent): components.type = add(component)
+  def +=(component: ShaderComponent): this.type = add(component)
 
-  def ++=(componentSet: TraversableOnce[ShaderComponent]): components.type = add(componentSet)
+  def ++=(componentSet: TraversableOnce[ShaderComponent]): this.type = add(componentSet)
 
-  def -=(component: ShaderComponent): components.type = remove(component)
+  def -=(component: ShaderComponent): this.type = remove(component)
 
-  def add(component: ShaderComponent): components.type = components += component
+  def add(component: ShaderComponent): this.type = { components += component; this }
 
-  def add(componentSet: TraversableOnce[ShaderComponent]): components.type = components ++= componentSet
+  def add(componentSet: TraversableOnce[ShaderComponent]): this.type = { components ++= componentSet; this }
 
-  def remove(component: ShaderComponent): components.type = components -= component
+  def remove(component: ShaderComponent): this.type = { components -= component; this }
 
   @throws[ProgramLinkException]("if there is an error while linking this shader program")
   def link(): ShaderProgram = {
