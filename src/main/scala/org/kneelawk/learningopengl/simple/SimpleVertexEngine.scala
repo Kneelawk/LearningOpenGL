@@ -1,10 +1,13 @@
 package org.kneelawk.learningopengl.simple
 
 import org.kneelawk.learningopengl.buffers.GLArrayBuffer
-import org.kneelawk.learningopengl.util.ResourceUtils
-import org.kneelawk.learningopengl.util.ResourceUtils.tryWith
-import org.kneelawk.learningopengl.{AbstractRenderEngine, GraphicsInterface}
-import org.lwjgl.opengl.GL30.{glBindVertexArray, glDeleteVertexArrays, glGenVertexArrays}
+import org.kneelawk.learningopengl.shaders.{ShaderComponentSource, ShaderType, UnlinkedShaderProgram}
+import org.kneelawk.learningopengl.util.ResourceUtils.{tryWith, tryWithDestroyer}
+import org.kneelawk.learningopengl.{AbstractRenderEngine, GraphicsInterface, ResourceUtil}
+import org.lwjgl.opengl.GL30._
+import org.lwjgl.opengl.GL20._
+import org.lwjgl.opengl.GL15._
+import org.lwjgl.opengl.GL11._
 import org.lwjgl.system.{MemoryStack, MemoryUtil}
 
 import scala.collection.mutable
@@ -24,13 +27,30 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
   private val indices = new mutable.HashMap[SimpleVertexModel, SimpleVertexModelIndex]
   private val indexList = new ListBuffer[SimpleVertexModelIndex]
 
+  private val vertexShader = new ShaderComponentSource(getClass.getResourceAsStream("vertex.glsl"), "vertex.glsl", ShaderType.Vertex).compile()
+  private val fragmentShader = new ShaderComponentSource(getClass.getResourceAsStream("fragment.glsl"), "fragment.glsl", ShaderType.Fragment).compile()
+  private val shaderProgram = (new UnlinkedShaderProgram("shader") += vertexShader += fragmentShader).link()
+  vertexShader.delete()
+  fragmentShader.delete()
+
   def onInit() {
   }
 
   def render() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+    glUseProgram(shaderProgram.id)
+
     // bind vertex array for rendering
     glBindVertexArray(vertexArrayId)
 
+    glEnableVertexAttribArray(0)
+    glBindBuffer(GL_ARRAY_BUFFER, vertices.getId)
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0)
+
+    glDrawArrays(GL_TRIANGLES, 0, vertices.getSize.toInt / 3)
+
+    glDisableVertexAttribArray(vertexArrayId)
   }
 
   def addModel(model: SimpleVertexModel) {
@@ -40,7 +60,7 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
 
     val index = SimpleVertexModelIndex(vertices.getSize, matrices.getSize)
 
-    ResourceUtils.tryWithDestroyer(MemoryUtil.memAllocFloat(model.vertexData.length)) { vertBuf =>
+    tryWithDestroyer(MemoryUtil.memAllocFloat(model.vertexData.length)) { vertBuf =>
       vertBuf.put(model.vertexData)
       vertBuf.flip()
       vertices.append(vertBuf)
@@ -88,5 +108,6 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
     glDeleteVertexArrays(vertexArrayId)
     vertices.destroy()
     matrices.destroy()
+    shaderProgram.delete()
   }
 }

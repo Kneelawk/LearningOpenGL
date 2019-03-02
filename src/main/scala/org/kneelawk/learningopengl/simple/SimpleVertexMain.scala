@@ -25,13 +25,14 @@ object SimpleVertexMain extends AppMain {
 
       GraphicsInterface.setupContext()
 
-      val camera = new Camera
+      val camera = new Camera()
       camera.setProjection(45, window.getWidth.toFloat / window.getHeight.toFloat, 0.01f, 100)
       camera.setView(0, 0, 5, 0, 0, 0, 0, 1, 0)
       // Z+ is towards the viewer
 
-      val engine = new SimpleVertexEngine
+      val engine = new SimpleVertexEngine()
       engine.init(window, camera)
+      engine.addModel(triangle)
       engine.loop()
       engine.destroy()
 
