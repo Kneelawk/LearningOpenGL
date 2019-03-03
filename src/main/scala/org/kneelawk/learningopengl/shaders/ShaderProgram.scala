@@ -59,6 +59,10 @@ class UnlinkedShaderProgram(name: String) {
 case class ShaderProgram(id: Int, name: String) {
   private var deleted = false
 
+  def getUniformLocation(name: CharSequence): Int = {
+    glGetUniformLocation(id, name)
+  }
+
   def delete(): Unit = if (!deleted) {
     glDeleteProgram(id)
     deleted = true

@@ -33,6 +33,9 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
   vertexShader.delete()
   fragmentShader.delete()
 
+  private val mvpBuffer = MemoryUtil.memAllocFloat(16)
+  private val mvpLocation = shaderProgram.getUniformLocation("MVP")
+
   def onInit() {
   }
 
@@ -43,6 +46,8 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
 
     // bind vertex array for rendering
     glBindVertexArray(vertexArrayId)
+
+    glUniformMatrix4fv(mvpLocation, false, camera.getMatrix.get(mvpBuffer))
 
     glEnableVertexAttribArray(0)
     glBindBuffer(GL_ARRAY_BUFFER, vertices.getId)
