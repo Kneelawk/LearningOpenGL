@@ -8,9 +8,43 @@ object SimpleVertexMain extends AppMain {
   val width = 1280
   val height = 720
   val triangle = SimpleVertexModel(Array(
-    -1, -1, 0,
-    1, -1, 0,
-    0, 1, 0), new Matrix4f)
+    -1, -1, -1,
+    1, 1, -1,
+    1, -1, -1,
+    -1, -1, -1,
+    -1, 1, -1,
+    1, 1, -1,
+    -1, -1, -1,
+    1, -1, -1,
+    1, -1, 1,
+    -1, -1, -1,
+    1, -1, 1,
+    -1, -1, 1,
+    -1, -1, -1,
+    -1, -1, 1,
+    -1, 1, 1,
+    -1, -1, -1,
+    -1, 1, 1,
+    -1, 1, -1,
+    1, 1, 1,
+    -1, 1, 1,
+    -1, -1, 1,
+    1, 1, 1,
+    -1, -1, 1,
+    1, -1, 1,
+    1, 1, 1,
+    1, 1, -1,
+    -1, 1, -1,
+    1, 1, 1,
+    -1, 1, -1,
+    -1, 1, 1,
+    1, 1, 1,
+    1, 1, -1,
+    1, -1, -1,
+    1, 1, 1,
+    1, -1, -1,
+    1, -1, 1
+  ), new Matrix4f)
 
   def run(args: Array[String]) {
     try {
@@ -27,7 +61,7 @@ object SimpleVertexMain extends AppMain {
 
       val camera = new Camera()
       camera.setProjection(45, window.getWidth.toFloat / window.getHeight.toFloat, 0.01f, 100)
-      camera.setView(4, 3, 3, 0, 0, 0, 0, 1, 0)
+      camera.setView(3, 3, 4, 0, 0, 0, 0, 1, 0)
       // Z+ is towards the viewer
       camera.update()
 
