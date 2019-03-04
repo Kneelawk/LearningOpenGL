@@ -1,5 +1,7 @@
 package org.kneelawk.learningopengl.simple
 
+import java.util
+
 import org.kneelawk.learningopengl.buffers.GLArrayBuffer
 import org.kneelawk.learningopengl.shaders.{ShaderComponentSource, ShaderType, UnlinkedShaderProgram}
 import org.kneelawk.learningopengl.util.TryUtil.{tryWith, tryWithDestroyer}
@@ -59,6 +61,16 @@ class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) 
     glBindBuffer(GL_ARRAY_BUFFER, colors.getId)
     glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0)
 
+    glEnableVertexAttribArray(2)
+    glEnableVertexAttribArray(3)
+    glEnableVertexAttribArray(4)
+    glEnableVertexAttribArray(5)
+    glBindBuffer(GL_ARRAY_BUFFER, matrices.getId)
+    glVertexAttribPointer(2, 4, GL_FLOAT, false, 16 << 2, 0)
+    glVertexAttribPointer(3, 4, GL_FLOAT, false, 16 << 2, 4 << 2)
+    glVertexAttribPointer(4, 4, GL_FLOAT, false, 16 << 2, 8 << 2)
+    glVertexAttribPointer(5, 4, GL_FLOAT, false, 16 << 2, 12 << 2)
+
     glDrawArrays(GL_TRIANGLES, 0, vertices.getSize.toInt / 3)
 
     glDisableVertexAttribArray(vertexArrayId)
@@ -83,12 +95,12 @@ class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) 
       colors.append(colorBuf)
     }(MemoryUtil.memFree)
 
-    tryWith(MemoryStack.stackPush()) { stack =>
-      val matBuf = stack.mallocFloat(16)
-      model.model.get(matBuf)
-      matBuf.flip()
+    tryWithDestroyer(MemoryUtil.memAllocFloat(model.vertexData.length / 3 * 16)) { matBuf =>
+      for (i <- 0 until model.vertexData.length / 3) {
+        model.model.get(i * 16, matBuf)
+      }
       matrices.append(matBuf)
-    }
+    }(MemoryUtil.memFree)
 
     indices += ((model, index))
     indexList += index

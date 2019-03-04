@@ -83,6 +83,16 @@ object SimpleVertexMain extends AppMain {
     0.982f,  0.099f,  0.879f
   ), new Matrix4f)
 
+  val triangle = SimpleVertexModel(Array(
+    -1, 0, 0,
+    1, 0, 0,
+    0, 1, 0
+  ), Array(
+    1, 0, 0,
+    0, 1, 0,
+    0, 0, 1
+  ), new Matrix4f().translate(0, 1, 0))
+
   val camera = new Camera()
   var rotation: Double = 0
 
@@ -106,6 +116,7 @@ object SimpleVertexMain extends AppMain {
 
       val engine = new SimpleVertexEngine(window, camera, update)
       engine.addModel(cube)
+      engine.addModel(triangle)
       engine.loop()
       engine.destroy()
 
