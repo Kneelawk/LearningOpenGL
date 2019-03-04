@@ -22,15 +22,21 @@ class Camera {
   def getMatrix: Matrix4f = pv
 
   def getLocation: Vector3f = location
+
   def getTarget: Vector3f = target
+
   def getUp: Vector3f = up
 
   def getFovy: Float = fovy
+
   def getAspect: Float = aspect
+
   def getZNear: Float = zNear
+
   def getZFar: Float = zFar
 
   def getView: Matrix4f = view
+
   def getProjection: Matrix4f = projection
 
   /**

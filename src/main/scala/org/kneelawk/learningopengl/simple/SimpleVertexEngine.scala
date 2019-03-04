@@ -3,11 +3,11 @@ package org.kneelawk.learningopengl.simple
 import org.kneelawk.learningopengl.buffers.GLArrayBuffer
 import org.kneelawk.learningopengl.shaders.{ShaderComponentSource, ShaderType, UnlinkedShaderProgram}
 import org.kneelawk.learningopengl.util.TryUtil.{tryWith, tryWithDestroyer}
-import org.kneelawk.learningopengl.{AbstractRenderEngine, Camera, GraphicsInterface, Window}
-import org.lwjgl.opengl.GL30._
-import org.lwjgl.opengl.GL20._
-import org.lwjgl.opengl.GL15._
+import org.kneelawk.learningopengl.{AbstractRenderEngine, Camera, Window}
 import org.lwjgl.opengl.GL11._
+import org.lwjgl.opengl.GL15._
+import org.lwjgl.opengl.GL20._
+import org.lwjgl.opengl.GL30._
 import org.lwjgl.system.{MemoryStack, MemoryUtil}
 
 import scala.collection.mutable

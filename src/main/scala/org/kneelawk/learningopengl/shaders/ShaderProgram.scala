@@ -16,15 +16,18 @@ class UnlinkedShaderProgram(name: String) {
   def -=(component: ShaderComponent): this.type = remove(component)
 
   def add(component: ShaderComponent): this.type = {
-    components += component; this
+    components += component
+    this
   }
 
   def add(componentSet: TraversableOnce[ShaderComponent]): this.type = {
-    components ++= componentSet; this
+    components ++= componentSet
+    this
   }
 
   def remove(component: ShaderComponent): this.type = {
-    components -= component; this
+    components -= component
+    this
   }
 
   @throws[ProgramLinkException]("if there is an error while linking this shader program")
