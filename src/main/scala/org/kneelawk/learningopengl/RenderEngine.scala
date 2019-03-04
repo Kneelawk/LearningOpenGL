@@ -3,7 +3,7 @@ package org.kneelawk.learningopengl
 trait RenderEngine[Model <: AnyRef] {
   def init(window: Window, camera: Camera)
 
-  def setUpdateCallback(callback: () => Unit)
+  def setUpdateCallback(callback: Float => Unit)
 
   def loop()
 

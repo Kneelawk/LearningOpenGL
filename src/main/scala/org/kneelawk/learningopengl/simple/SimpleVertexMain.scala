@@ -7,7 +7,7 @@ import org.lwjgl.glfw.GLFW.{GLFW_KEY_ESCAPE, GLFW_RELEASE}
 object SimpleVertexMain extends AppMain {
   val width = 1280
   val height = 720
-  val triangle = SimpleVertexModel(Array(
+  val cube = SimpleVertexModel(Array(
     -1, -1, -1,
     1, 1, -1,
     1, -1, -1,
@@ -39,12 +39,15 @@ object SimpleVertexMain extends AppMain {
     -1, 1, -1,
     -1, 1, 1,
     1, 1, 1,
-    1, 1, -1,
+    1, -1, 1,
     1, -1, -1,
     1, 1, 1,
     1, -1, -1,
-    1, -1, 1
+    1, 1, -1
   ), new Matrix4f)
+
+  val camera = new Camera()
+  var rotation: Double = 0
 
   def run(args: Array[String]) {
     try {
@@ -59,21 +62,31 @@ object SimpleVertexMain extends AppMain {
 
       GraphicsInterface.setupContext()
 
-      val camera = new Camera()
       camera.setProjection(45, window.getWidth.toFloat / window.getHeight.toFloat, 0.01f, 100)
-      camera.setView(3, 3, 4, 0, 0, 0, 0, 1, 0)
+      camera.setView(0, 3, 5, 0, 0, 0, 0, 1, 0)
       // Z+ is towards the viewer
       camera.update()
 
       val engine = new SimpleVertexEngine()
       engine.init(window, camera)
-      engine.addModel(triangle)
+      engine.setUpdateCallback(update)
+      engine.addModel(cube)
       engine.loop()
       engine.destroy()
 
       window.destroy()
     } finally {
       SystemInterface.destroy()
+    }
+  }
+
+  def update(delta: Float): Unit = {
+    camera.setView(math.sin(rotation).toFloat * 5, 3, math.cos(rotation).toFloat * 5, 0, 0, 0, 0, 1, 0)
+    camera.update()
+
+    rotation += 0.25 * delta
+    if (rotation > math.Pi * 2) {
+      rotation -= math.Pi * 2
     }
   }
 }

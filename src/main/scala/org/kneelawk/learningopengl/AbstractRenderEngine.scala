@@ -9,9 +9,10 @@ package org.kneelawk.learningopengl
  */
 
 abstract class AbstractRenderEngine[Model <: AnyRef] extends RenderEngine[Model] {
-  protected var update: () => Unit = _
+  protected var update: Float => Unit = _
   protected var window: Window = _
   protected var camera: Camera = _
+  protected val deltaHelper = new DeltaHelper
 
   override def init(window: Window, camera: Camera) {
     this.window = window
@@ -20,7 +21,7 @@ abstract class AbstractRenderEngine[Model <: AnyRef] extends RenderEngine[Model]
     onInit()
   }
 
-  override def setUpdateCallback(callback: () => Unit) {
+  override def setUpdateCallback(callback: Float => Unit) {
     update = callback
   }
 
@@ -30,8 +31,10 @@ abstract class AbstractRenderEngine[Model <: AnyRef] extends RenderEngine[Model]
 
       GraphicsInterface.update()
 
+      deltaHelper.update()
+
       if (update != null)
-        update()
+        update(deltaHelper.getDelta)
 
       render()
 
