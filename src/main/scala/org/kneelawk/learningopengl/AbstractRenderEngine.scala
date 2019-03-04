@@ -15,8 +15,6 @@ abstract class AbstractRenderEngine[Model <: AnyRef](protected val window: Windo
     while (!window.shouldWindowClose()) {
       SystemInterface.pollEvents()
 
-      GraphicsInterface.update()
-
       deltaHelper.update()
 
       update(deltaHelper.getDelta)

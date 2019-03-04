@@ -79,7 +79,7 @@ object SimpleVertexMain extends AppMain {
   }
 
   def update(delta: Float): Unit = {
-    camera.setView(math.sin(rotation).toFloat * 5, 3, math.cos(rotation).toFloat * 5, 0, 0, 0, 0, 1, 0)
+    camera.setLocation(math.sin(rotation).toFloat * 5, 3, math.cos(rotation).toFloat * 5)
     camera.update()
 
     rotation += 0.25 * delta

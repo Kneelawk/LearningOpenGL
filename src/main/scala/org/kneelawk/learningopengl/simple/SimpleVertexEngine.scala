@@ -15,7 +15,11 @@ import scala.collection.mutable.ListBuffer
 
 class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) extends AbstractRenderEngine[SimpleVertexModel](window, camera, update) {
   // setup clear color
-  GraphicsInterface.setBackground(0.2f, 0.2f, 0.2f, 1.0f)
+  glClearColor(0.2f, 0.2f, 0.2f, 1.0f)
+
+  // setup depth testing
+  glEnable(GL_DEPTH_TEST)
+  glDepthFunc(GL_LESS)
 
   // generate the vertex arrays
   private val vertexArrayId = glGenVertexArrays()

@@ -15,12 +15,4 @@ object GraphicsInterface {
     println(s"GL_VERSION: $version")
     println(s"GL_VENDOR: $vendor")
   }
-
-  def setBackground(r: Float, g: Float, b: Float, a: Float) {
-    glClearColor(r, g, b, a)
-  }
-
-  def update() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-  }
 }
