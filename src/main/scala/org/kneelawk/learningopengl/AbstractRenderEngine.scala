@@ -1,5 +1,7 @@
 package org.kneelawk.learningopengl
 
+import org.kneelawk.learningopengl.util.DeltaHelper
+
 /*
  * I wonder if you could have all the rendering code be in special
  * implicit ModelRenderers and have each one know how to render a specific kind of model?

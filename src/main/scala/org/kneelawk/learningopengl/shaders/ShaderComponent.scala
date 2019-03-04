@@ -2,7 +2,7 @@ package org.kneelawk.learningopengl.shaders
 
 import java.io.InputStream
 
-import org.kneelawk.learningopengl.ResourceUtil
+import org.kneelawk.learningopengl.util.ResourceUtil
 import org.lwjgl.BufferUtils
 import org.lwjgl.opengl.GL11.GL_TRUE
 import org.lwjgl.opengl.GL20._

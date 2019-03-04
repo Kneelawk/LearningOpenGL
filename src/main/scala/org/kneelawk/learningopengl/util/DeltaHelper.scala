@@ -1,4 +1,4 @@
-package org.kneelawk.learningopengl
+package org.kneelawk.learningopengl.util
 
 class DeltaHelper {
   private var lastTime = System.currentTimeMillis()

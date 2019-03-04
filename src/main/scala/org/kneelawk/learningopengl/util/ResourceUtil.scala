@@ -1,4 +1,4 @@
-package org.kneelawk.learningopengl
+package org.kneelawk.learningopengl.util
 
 import java.io.InputStream
 

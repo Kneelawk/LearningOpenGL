@@ -2,7 +2,7 @@ package org.kneelawk.learningopengl.util
 
 import scala.util.control.NonFatal
 
-object ResourceUtils {
+object TryUtil {
   /**
    * Creates a resource, uses it within the safety of a try block, and closes it when done.
    *
