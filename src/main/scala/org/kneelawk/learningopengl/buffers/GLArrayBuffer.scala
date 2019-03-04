@@ -2,9 +2,11 @@ package org.kneelawk.learningopengl.buffers
 
 import java.nio._
 
+import org.kneelawk.learningopengl.util.TryUtil._
 import org.lwjgl.opengl.ARBInvalidateSubdata._
 import org.lwjgl.opengl.GL15._
 import org.lwjgl.opengl.GL31._
+import org.lwjgl.system.MemoryStack.stackPush
 import org.lwjgl.system.MemoryUtil._
 
 /**
@@ -69,12 +71,36 @@ class GLArrayBuffer(initialAllocation: Long) {
   }
 
   /**
+   * Set a single byte within this buffer.
+   *
+   * @param offset the offset of the byte to set.
+   * @param value  the new value of the byte to set.
+   */
+  def set(offset: Long, value: Byte): Unit = {
+    tryWith(stackPush()) { stack =>
+      set(offset, stack.bytes(value))
+    }
+  }
+
+  /**
    * Set data within this buffer.
    * This can extend the length of this buffer if offset + buf.remaining() > getSize.
    * ShortBuffer version.
    */
   def set(offset: Long, buf: ShortBuffer) {
     setNative(offset, buf.remaining() << 1, memAddress(buf))
+  }
+
+  /**
+   * Set a single short within this buffer.
+   *
+   * @param offset the offset in bytes of the short to set.
+   * @param value  the new value of the short to set.
+   */
+  def set(offset: Long, value: Short): Unit = {
+    tryWith(stackPush()) { stack =>
+      set(offset, stack.shorts(value))
+    }
   }
 
   /**
@@ -87,12 +113,36 @@ class GLArrayBuffer(initialAllocation: Long) {
   }
 
   /**
+   * Set a single int within this buffer.
+   *
+   * @param offset the offset in bytes of the int to set.
+   * @param value  the new value of the int to set.
+   */
+  def set(offset: Long, value: Int): Unit = {
+    tryWith(stackPush()) { stack =>
+      set(offset, stack.ints(value))
+    }
+  }
+
+  /**
    * Set data within this buffer.
    * This can extend the length of this buffer if offset + buf.remaining() > getSize.
    * LongBuffer version.
    */
   def set(offset: Long, buf: LongBuffer) {
     setNative(offset, buf.remaining() << 3, memAddress(buf))
+  }
+
+  /**
+   * Set a single long within this buffer.
+   *
+   * @param offset the offset in bytes of the long to set.
+   * @param value  the new value of the long to set.
+   */
+  def set(offset: Long, value: Long): Unit = {
+    tryWith(stackPush()) { stack =>
+      set(offset, stack.longs(value))
+    }
   }
 
   /**
@@ -105,12 +155,36 @@ class GLArrayBuffer(initialAllocation: Long) {
   }
 
   /**
+   * Set a single float within this buffer.
+   *
+   * @param offset the offset in bytes of the float to set.
+   * @param value  the new value of the float to set.
+   */
+  def set(offset: Long, value: Float): Unit = {
+    tryWith(stackPush()) { stack =>
+      set(offset, stack.floats(value))
+    }
+  }
+
+  /**
    * Set data within this buffer.
    * This can extend the length of this buffer if offset + buf.remaining() > getSize.
    * DoubleBuffer version.
    */
   def set(offset: Long, buf: DoubleBuffer) {
     setNative(offset, buf.remaining() << 3, memAddress(buf))
+  }
+
+  /**
+   * Set a single double within this buffer.
+   *
+   * @param offset the offset in bytes of the double to set.
+   * @param value  the new value of the double to set.
+   */
+  def set(offset: Long, value: Double): Unit = {
+    tryWith(stackPush()) { stack =>
+      set(offset, stack.doubles(value))
+    }
   }
 
   /**
@@ -179,11 +253,33 @@ class GLArrayBuffer(initialAllocation: Long) {
   }
 
   /**
+   * Append a single byte to the end of this buffer.
+   *
+   * @param value the value of the byte to append.
+   */
+  def append(value: Byte): Unit = {
+    tryWith(stackPush()) { stack =>
+      append(stack.bytes(value))
+    }
+  }
+
+  /**
    * Append data to the end of this buffer.
    * ShortBuffer version.
    */
   def append(buf: ShortBuffer) {
     appendNative(buf.remaining() << 1, memAddress(buf))
+  }
+
+  /**
+   * Append a single short to the end of this buffer.
+   *
+   * @param value the value of the short to append.
+   */
+  def append(value: Short): Unit = {
+    tryWith(stackPush()) { stack =>
+      append(stack.shorts(value))
+    }
   }
 
   /**
@@ -195,11 +291,33 @@ class GLArrayBuffer(initialAllocation: Long) {
   }
 
   /**
+   * Append a single int to the end of this buffer.
+   *
+   * @param value the value of the int to append.
+   */
+  def append(value: Int): Unit = {
+    tryWith(stackPush()) { stack =>
+      append(stack.ints(value))
+    }
+  }
+
+  /**
    * Append data to the end of this buffer.
    * LongBuffer version.
    */
   def append(buf: LongBuffer) {
     appendNative(buf.remaining() << 3, memAddress(buf))
+  }
+
+  /**
+   * Append a single long to the end of this buffer.
+   *
+   * @param value the value of the long to append.
+   */
+  def append(value: Long): Unit = {
+    tryWith(stackPush()) { stack =>
+      append(stack.longs(value))
+    }
   }
 
   /**
@@ -211,11 +329,33 @@ class GLArrayBuffer(initialAllocation: Long) {
   }
 
   /**
+   * Append a single float to the end of this buffer.
+   *
+   * @param value the value of the float to append.
+   */
+  def append(value: Float): Unit = {
+    tryWith(stackPush()) { stack =>
+      append(stack.floats(value))
+    }
+  }
+
+  /**
    * Append data to the end of this buffer.
    * DoubleBuffer version.
    */
   def append(buf: DoubleBuffer) {
     appendNative(buf.remaining() << 3, memAddress(buf))
+  }
+
+  /**
+   * Append a single double to the end of this buffer.
+   *
+   * @param value the value of the double to append.
+   */
+  def append(value: Double): Unit = {
+    tryWith(stackPush()) { stack =>
+      append(stack.doubles(value))
+    }
   }
 
   /**
@@ -243,12 +383,38 @@ class GLArrayBuffer(initialAllocation: Long) {
   }
 
   /**
+   * Inserts a single byte into this buffer at offset, moving the data currently after
+   * offset to the end of where this byte is inserted.
+   *
+   * @param offset the offset of the byte to be inserted.
+   * @param value  the value of the byte to be inserted.
+   */
+  def insert(offset: Long, value: Byte): Unit = {
+    tryWith(stackPush()) { stack =>
+      insert(offset, stack.bytes(value))
+    }
+  }
+
+  /**
    * Inserts a chunk of data into this buffer at offset, moving the data currently after
    * offset to the end of where this chunk is inserted.
    * ShortBuffer version.
    */
   def insert(offset: Long, buf: ShortBuffer) {
     insertNative(offset, buf.remaining() << 1, memAddress(buf))
+  }
+
+  /**
+   * Inserts a single short into this buffer at offset, moving the data currently after
+   * offset to the end of where this short is inserted.
+   *
+   * @param offset the offset in byte of the short to be inserted.
+   * @param value  the value of the short to be inserted.
+   */
+  def insert(offset: Long, value: Short): Unit = {
+    tryWith(stackPush()) { stack =>
+      insert(offset, stack.shorts(value))
+    }
   }
 
   /**
@@ -261,12 +427,38 @@ class GLArrayBuffer(initialAllocation: Long) {
   }
 
   /**
+   * Inserts a single int into this buffer at offset, moving the data currently after
+   * offset to the end of where this int is inserted.
+   *
+   * @param offset the offset in bytes of the int to be inserted.
+   * @param value  the value of the int to be inserted.
+   */
+  def insert(offset: Long, value: Int): Unit = {
+    tryWith(stackPush()) { stack =>
+      insert(offset, stack.ints(value))
+    }
+  }
+
+  /**
    * Inserts a chunk of data into this buffer at offset, moving the data currently after
    * offset to the end of where this chunk is inserted.
    * LongBuffer version.
    */
   def insert(offset: Long, buf: LongBuffer) {
     insertNative(offset, buf.remaining() << 3, memAddress(buf))
+  }
+
+  /**
+   * Inserts a single long into this buffer at offset, moving the data currently after
+   * offset to the end of where this long is inserted.
+   *
+   * @param offset the offset in bytes of the long to be inserted.
+   * @param value  the value of the long to be inserted.
+   */
+  def insert(offset: Long, value: Long): Unit = {
+    tryWith(stackPush()) { stack =>
+      insert(offset, stack.longs(value))
+    }
   }
 
   /**
@@ -279,12 +471,38 @@ class GLArrayBuffer(initialAllocation: Long) {
   }
 
   /**
+   * Inserts a single float into this buffer at offset, moving the data currently after
+   * offset to the end of where this float is inserted.
+   *
+   * @param offset the offset in bytes of the float to be inserted.
+   * @param value  the value of the float to be inserted.
+   */
+  def insert(offset: Long, value: Float): Unit = {
+    tryWith(stackPush()) { stack =>
+      insert(offset, stack.floats(value))
+    }
+  }
+
+  /**
    * Inserts a chunk of data into this buffer at offset, moving the data currently after
    * offset to the end of where this chunk is inserted.
    * DoubleBuffer version.
    */
   def insert(offset: Long, buf: DoubleBuffer) {
     insertNative(offset, buf.remaining() << 3, memAddress(buf))
+  }
+
+  /**
+   * Inserts a single double into this buffer at offset, moving the data currently after
+   * offset to the end of where this double is inserted.
+   *
+   * @param offset the offset in bytes of the double to be inserted.
+   * @param value  the value of the double to be inserted.
+   */
+  def insert(offset: Long, value: Double): Unit = {
+    tryWith(stackPush()) { stack =>
+      insert(offset, stack.doubles(value))
+    }
   }
 
   /**
