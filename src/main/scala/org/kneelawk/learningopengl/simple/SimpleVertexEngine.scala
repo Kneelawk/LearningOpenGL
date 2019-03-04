@@ -3,7 +3,7 @@ package org.kneelawk.learningopengl.simple
 import org.kneelawk.learningopengl.buffers.GLArrayBuffer
 import org.kneelawk.learningopengl.shaders.{ShaderComponentSource, ShaderType, UnlinkedShaderProgram}
 import org.kneelawk.learningopengl.util.ResourceUtils.{tryWith, tryWithDestroyer}
-import org.kneelawk.learningopengl.{AbstractRenderEngine, GraphicsInterface, ResourceUtil}
+import org.kneelawk.learningopengl.{AbstractRenderEngine, Camera, GraphicsInterface, ResourceUtil, Window}
 import org.lwjgl.opengl.GL30._
 import org.lwjgl.opengl.GL20._
 import org.lwjgl.opengl.GL15._
@@ -13,7 +13,7 @@ import org.lwjgl.system.{MemoryStack, MemoryUtil}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
-class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
+class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) extends AbstractRenderEngine[SimpleVertexModel](window, camera, update) {
   // setup clear color
   GraphicsInterface.setBackground(0.2f, 0.2f, 0.2f, 1.0f)
 
@@ -35,9 +35,6 @@ class SimpleVertexEngine extends AbstractRenderEngine[SimpleVertexModel] {
 
   private val mvpBuffer = MemoryUtil.memAllocFloat(16)
   private val mvpLocation = shaderProgram.getUniformLocation("MVP")
-
-  def onInit() {
-  }
 
   def render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)

@@ -67,9 +67,7 @@ object SimpleVertexMain extends AppMain {
       // Z+ is towards the viewer
       camera.update()
 
-      val engine = new SimpleVertexEngine()
-      engine.init(window, camera)
-      engine.setUpdateCallback(update)
+      val engine = new SimpleVertexEngine(window, camera, update)
       engine.addModel(cube)
       engine.loop()
       engine.destroy()

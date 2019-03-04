@@ -8,22 +8,8 @@ package org.kneelawk.learningopengl
  * to effectively become that of the RenderEngine.
  */
 
-abstract class AbstractRenderEngine[Model <: AnyRef] extends RenderEngine[Model] {
-  protected var update: Float => Unit = _
-  protected var window: Window = _
-  protected var camera: Camera = _
+abstract class AbstractRenderEngine[Model <: AnyRef](protected val window: Window, protected val camera: Camera, protected val update: Float => Unit) extends RenderEngine[Model] {
   protected val deltaHelper = new DeltaHelper
-
-  override def init(window: Window, camera: Camera) {
-    this.window = window
-    this.camera = camera
-
-    onInit()
-  }
-
-  override def setUpdateCallback(callback: Float => Unit) {
-    update = callback
-  }
 
   override def loop() {
     while (!window.shouldWindowClose()) {
@@ -33,16 +19,13 @@ abstract class AbstractRenderEngine[Model <: AnyRef] extends RenderEngine[Model]
 
       deltaHelper.update()
 
-      if (update != null)
-        update(deltaHelper.getDelta)
+      update(deltaHelper.getDelta)
 
       render()
 
       window.refresh()
     }
   }
-
-  protected def onInit()
 
   protected def render()
 }
