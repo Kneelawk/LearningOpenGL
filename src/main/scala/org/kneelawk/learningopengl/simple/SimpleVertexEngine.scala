@@ -4,6 +4,7 @@ import java.util
 
 import org.kneelawk.learningopengl.buffers.GLArrayBuffer
 import org.kneelawk.learningopengl.shaders.{ShaderComponentSource, ShaderType, UnlinkedShaderProgram}
+import org.kneelawk.learningopengl.textures.GLTextureSource
 import org.kneelawk.learningopengl.util.TryUtil.{tryWith, tryWithDestroyer}
 import org.kneelawk.learningopengl.{AbstractRenderEngine, Camera, Window}
 import org.lwjgl.opengl.GL11._
@@ -29,7 +30,7 @@ class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) 
   glBindVertexArray(vertexArrayId)
 
   private val vertices = new GLArrayBuffer
-  private val colors = new GLArrayBuffer
+  private val uvs = new GLArrayBuffer
   private val matrices = new GLArrayBuffer
   private val indices = new mutable.HashMap[SimpleVertexModel, SimpleVertexModelIndex]
   private val indexList = new ListBuffer[SimpleVertexModelIndex]
@@ -43,6 +44,8 @@ class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) 
   private val mvpBuffer = MemoryUtil.memAllocFloat(16)
   private val mvpLocation = shaderProgram.getUniformLocation("vpMatrix")
 
+  private val texture = new GLTextureSource(getClass.getResource("texture.png")).build()
+
   def render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
@@ -51,6 +54,8 @@ class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) 
     // bind vertex array for rendering
     glBindVertexArray(vertexArrayId)
 
+    glBindTexture(GL_TEXTURE_2D, texture.id)
+
     glUniformMatrix4fv(mvpLocation, false, camera.getMatrix.get(mvpBuffer))
 
     glEnableVertexAttribArray(0)
@@ -58,8 +63,8 @@ class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) 
     glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0)
 
     glEnableVertexAttribArray(1)
-    glBindBuffer(GL_ARRAY_BUFFER, colors.getId)
-    glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0)
+    glBindBuffer(GL_ARRAY_BUFFER, uvs.getId)
+    glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0)
 
     glEnableVertexAttribArray(2)
     glEnableVertexAttribArray(3)
@@ -81,7 +86,7 @@ class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) 
       return
     }
 
-    val index = SimpleVertexModelIndex(vertices.getSize, colors.getSize, matrices.getSize)
+    val index = SimpleVertexModelIndex(vertices.getSize, uvs.getSize, matrices.getSize)
 
     tryWithDestroyer(MemoryUtil.memAllocFloat(model.vertexData.length)) { vertBuf =>
       vertBuf.put(model.vertexData)
@@ -89,10 +94,10 @@ class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) 
       vertices.append(vertBuf)
     }(MemoryUtil.memFree)
 
-    tryWithDestroyer(MemoryUtil.memAllocFloat(model.colorData.length)) { colorBuf =>
-      colorBuf.put(model.colorData)
-      colorBuf.flip()
-      colors.append(colorBuf)
+    tryWithDestroyer(MemoryUtil.memAllocFloat(model.uvData.length)) { uvBuf =>
+      uvBuf.put(model.uvData)
+      uvBuf.flip()
+      uvs.append(uvBuf)
     }(MemoryUtil.memFree)
 
     tryWithDestroyer(MemoryUtil.memAllocFloat(model.vertexData.length / 3 * 16)) { matBuf =>
@@ -113,16 +118,16 @@ class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) 
 
     val index = indices(model)
     val vertLen = model.vertexData.length << 2
-    val colorLen = model.colorData.length << 2
+    val uvLen = model.uvData.length << 2
     val matLen = 16 << 2
 
     vertices.remove(index.vertex, vertLen)
-    colors.remove(index.color, colorLen)
+    uvs.remove(index.uv, uvLen)
     matrices.remove(index.matrix, matLen)
 
     indexList.slice(indexList.indexOf(index) + 1, indexList.size).foreach({ f =>
       f.vertex -= vertLen
-      f.color -= colorLen
+      f.uv -= uvLen
       f.matrix -= matLen
     })
 
@@ -131,7 +136,7 @@ class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) 
 
   def clearModels() {
     vertices.clear()
-    colors.clear()
+    uvs.clear()
     matrices.clear()
     indices.clear()
     indexList.clear()
@@ -140,8 +145,9 @@ class SimpleVertexEngine(window: Window, camera: Camera, update: Float => Unit) 
   def destroy() {
     glDeleteVertexArrays(vertexArrayId)
     vertices.destroy()
-    colors.destroy()
+    uvs.destroy()
     matrices.destroy()
     shaderProgram.delete()
+    texture.delete()
   }
 }

@@ -65,15 +65,64 @@ object TryUtil {
     }
   }
 
-  def tryWithCheckedDestroyer[Resource >: Null, Result](creator: => Resource)(block: Resource => Result)(destroyer: (Resource, Throwable => Unit) => Unit): Result = {
+  def tryWithMultiDestroyer[Resource >: Null, Result](creator: => Resource)(block: Resource => Result)(destroyers: (Resource => Unit)*): Result = {
     var resource: Resource = null
     var exception: Throwable = null
+    var thrown: Boolean = false
+
     try {
       resource = creator
       block(resource)
     } catch {
       case NonFatal(e) =>
         exception = e
+        thrown = true
+        throw e
+    } finally {
+      if (resource != null) {
+        if (exception != null) {
+          for (destroyer <- destroyers) {
+            try {
+              destroyer(resource)
+            } catch {
+              case NonFatal(e) =>
+                exception.addSuppressed(e)
+            }
+          }
+        } else {
+          for (destroyer <- destroyers) {
+            try {
+              destroyer(resource)
+            } catch {
+              case NonFatal(e) =>
+                if (exception != null) {
+                  exception.addSuppressed(e)
+                } else {
+                  exception = e
+                }
+            }
+          }
+        }
+      }
+
+      if (exception != null && !thrown) {
+        throw exception
+      }
+    }
+  }
+
+  def tryWithCheckedDestroyer[Resource >: Null, Result](creator: => Resource)(block: Resource => Result)(destroyer: (Resource, Throwable => Unit) => Unit): Result = {
+    var resource: Resource = null
+    var exception: Throwable = null
+    var thrown: Boolean = false
+
+    try {
+      resource = creator
+      block(resource)
+    } catch {
+      case NonFatal(e) =>
+        exception = e
+        thrown = true
         throw e
     } finally {
       if (resource != null) {
@@ -87,14 +136,27 @@ object TryUtil {
               exception.addSuppressed(e)
           }
         } else {
-          destroyer(resource, { e =>
-            if (exception != null) {
-              exception.addSuppressed(e)
-            } else {
-              exception = e
-            }
-          })
+          try {
+            destroyer(resource, { e =>
+              if (exception != null) {
+                exception.addSuppressed(e)
+              } else {
+                exception = e
+              }
+            })
+          } catch {
+            case NonFatal(e) =>
+              if (exception != null) {
+                exception.addSuppressed(e)
+              } else {
+                exception = e
+              }
+          }
         }
+      }
+
+      if (exception != null && !thrown) {
+        throw exception
       }
     }
   }
